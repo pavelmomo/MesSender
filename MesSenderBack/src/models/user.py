@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from . import Base
 
 
@@ -15,3 +15,4 @@ class User(Base):
     email: Mapped[str]
     password_hash: Mapped[str]
     role: Mapped[Role]
+

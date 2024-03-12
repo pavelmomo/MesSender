@@ -1,10 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
-from typing_extensions import Annotated
-from src.api.dependencies import (UOW,
-                                  AbstractUOW,
-                                  DialogService)
+from fastapi import APIRouter, Depends
+from src.api.dependencies import (UOW, DialogService,
+                                  MessageService, Paginator)
 
-from src.schemas.dialog_schemas import DialogDTO, DialogAddDTO
+from src.schemas import (DialogCreateRespDTO, MessageCreateRespDTO,
+                         MessageCreateDTO, MessageDTO)
 
 router = APIRouter(
     prefix="/api/dialogs",
@@ -12,31 +11,26 @@ router = APIRouter(
 )  # создание роутера
 
 
-@router.get("/")  # получение списка диалогов
-async def get_user_dialogs(user_id: int, uow: UOW):
-    result = await DialogService.get_user_dialogs(uow,user_id)
+@router.get("/", response_model=int)  # получение id диалога по id участников
+async def get_dialog_id(uid: int, remote_uid: int, uow: UOW):
+    result = await DialogService.get_dual_dialog_id(uow, uid, remote_uid)
     return result
 
 
-@router.post("/")  # добавление диалога
-async def add_dialog(dialog: DialogAddDTO, uow: Annotated[AbstractUOW, Depends(UOW)]):
-    pass
-    # session.add(Dialog(name=dialog.name,is_multiuser=dialog.is_multiuser))
-    # res = await session.commit()
-    # return {"Success":True}
+@router.post("/", response_model=DialogCreateRespDTO)  # создание диалога на 2 чел.
+async def create_dialog(uid: int, remote_uid: int, uow: UOW):
+    result = await DialogService.create_dual_dialog(uow, uid, remote_uid)
+    return result
 
 
-@router.delete("/{id}")  # удаление диалога
-async def delete_dialog(id: int, uow: Annotated[AbstractUOW, Depends(UOW)]):
-    pass
-    # res = await session.get(Dialog,[id])
-    # if res != None:
-    #     await session.delete(res)
-    #     await session.commit()
-    #     res = {"Success":True}
-    # else:
-    #     res = {"Success":False}
-    #
-    # return res
+@router.post("/{id}/messages", response_model=MessageCreateRespDTO)  # отправка сообщения в диалог
+async def send_message(id: int, message: MessageCreateDTO, uow: UOW):
+    message.dialog_id = id
+    result = await MessageService.send_message(uow, message)
+    return result
 
 
+@router.get("/{id}/messages", response_model=list[MessageDTO])  # запрос сообщений из диалога
+async def get_messages(id: int, uow: UOW, paginator: Paginator = Depends()):
+    result = await MessageService.get_dialog_messages(uow, id, paginator.limit, paginator.offset)
+    return result
