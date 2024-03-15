@@ -1,7 +1,7 @@
 import uvicorn
-from db.db_pgs import DatabasePgs
-from fastapi import FastAPI
+from src.db.db_pgs import DatabasePgs
 from api.routers import all_routers
+from fastapi import FastAPI
 
 app = FastAPI(title="Web Application", debug=True)  # создание экземпляра приложения Fastapi
 for router in all_routers:  # добавление всех роутеров

@@ -28,14 +28,14 @@ class DatabasePgs:
             url=DatabasePgs.url,
             echo=True
         )
-        # await DatabasePgs.create_and_init_tables()
+        await DatabasePgs.create_and_init_tables()
         DatabasePgs.session_factory = async_sessionmaker(DatabasePgs.engine,
                                                          class_=AsyncSession,
                                                          expire_on_commit=False)
 
     @classmethod
     async def create_and_init_tables(cls):
-        from ..models import User, Dialog, DialogUser
+        from src.models import User, Dialog, DialogUser, Base
         async with DatabasePgs.engine.connect() as conn:
             await conn.run_sync(Base.metadata.drop_all)
             await conn.run_sync(Base.metadata.create_all)
@@ -45,15 +45,15 @@ class DatabasePgs:
                     {'username': "mark", 'email': 'mark@mail.ru', 'password_hash': 'kram', 'role': 'user'},
                     {'username': "jack", 'email': 'jack@mail.ru', 'password_hash': 'kcaj', 'role': 'user'}
                 ])
-            # await conn.execute(
-            #     insert(Dialog),
-            #     [{'id': 1}]
-            # )
-            # await conn.execute(
-            #     insert(DialogUser),
-            #     [
-            #         {'dialog_id': 1, 'user_id': 2, 'remote_uid': 1 },
-            #         {'dialog_id': 1, 'user_id': 1, 'remote_uid': 2  }
-            #     ]
-            # )
+            await conn.execute(
+                insert(Dialog),
+                [{'id': 1}]
+            )
+            await conn.execute(
+                insert(DialogUser),
+                [
+                    {'dialog_id': 1, 'user_id': 2, 'remote_uid': 1 },
+                    {'dialog_id': 1, 'user_id': 1, 'remote_uid': 2  }
+                ]
+            )
             await conn.commit()
