@@ -3,10 +3,11 @@ from sqlalchemy.ext.asyncio import (async_sessionmaker,
                                     AsyncSession,
                                     AsyncEngine)
 from src.config import (DB_HOST,
-                        DB_PORT,
-                        DB_NAME,
-                        DB_USER,
-                        DB_PASS)
+                      DB_PORT,
+                      DB_NAME,
+                      DB_USER,
+                      DB_PASS)
+
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import insert
 
@@ -27,14 +28,14 @@ class DatabasePgs:
             url=DatabasePgs.url,
             echo=True
         )
-        #await DatabasePgs.create_and_init_tables()
+        # await DatabasePgs.create_and_init_tables()
         DatabasePgs.session_factory = async_sessionmaker(DatabasePgs.engine,
                                                          class_=AsyncSession,
                                                          expire_on_commit=False)
 
     @classmethod
     async def create_and_init_tables(cls):
-        from src.models import User, Dialog, DialogUser
+        from ..models import User, Dialog, DialogUser
         async with DatabasePgs.engine.connect() as conn:
             await conn.run_sync(Base.metadata.drop_all)
             await conn.run_sync(Base.metadata.create_all)

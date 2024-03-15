@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 from src.schemas import DialogDTO
-from src.api.dependencies import (UOW,
-                                  DialogService,
-                                  Paginator)
+from .dependencies import (UOW,
+                          DialogService,
+                          Paginator)
 
 router = APIRouter(
     prefix="/api/users",

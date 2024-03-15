@@ -1,6 +1,7 @@
 from typing import List
 from src.repositories import AbstractUOW
-from src.schemas import DialogDTO,DialogViewStatus,DialogCreateRespDTO
+from src.schemas import (DialogDTO,DialogViewStatus,
+                       DialogCreateRespDTO, CommonStatusDTO)
 from src.models import MessageStatus
 
 
@@ -27,10 +28,12 @@ class DialogService:
             return dialogs_dto
 
     @classmethod
-    async def get_dual_dialog_id(cls, uow: AbstractUOW, uid: int, remote_uid: int):
+    async def get_dual_dialog_id(cls, uow: AbstractUOW, uid: int, remote_uid: int) -> CommonStatusDTO:
         async with uow:
             result = await uow.dialogs.get_dual_dialog_id(uid, remote_uid)
-            return result
+            if result < 0:
+                return CommonStatusDTO(success=False)
+            return CommonStatusDTO(success=True,id=result)
 
     @classmethod
     async def hide_dialog(cls, dialog_id: int, user_id):

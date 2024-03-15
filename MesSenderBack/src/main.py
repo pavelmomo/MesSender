@@ -1,5 +1,5 @@
 import uvicorn
-from src.db.db_pgs import DatabasePgs
+from db.db_pgs import DatabasePgs
 from fastapi import FastAPI
 from api.routers import all_routers
 

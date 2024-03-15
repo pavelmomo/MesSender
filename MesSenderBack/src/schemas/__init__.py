@@ -1,2 +1,3 @@
-from src.schemas.message_schemas import *
-from src.schemas.dialog_schemas import *
+from .message_schemas import *
+from .dialog_schemas import *
+from .common_schemas import *

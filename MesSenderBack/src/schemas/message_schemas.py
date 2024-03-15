@@ -10,9 +10,6 @@ class MessageCreateDTO(BaseModel):
     user_id: int
     text: str
 
-class MessageCreateRespDTO(BaseModel):
-    success: bool
-    message_id: Optional[int] = None
 
 
 class MessageDTO(BaseModel):

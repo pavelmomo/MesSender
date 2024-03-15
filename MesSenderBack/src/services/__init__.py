@@ -1,2 +1,2 @@
-from src.services.dialog_service import DialogService
-from src.services.message_service import MessageService
+from .dialog_service import DialogService
+from .message_service import MessageService

@@ -49,7 +49,8 @@ class AbstractMessageRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_messages(self, dialog_id: int, limit: int, offset: int) -> Sequence[Message]:
+    async def get_messages(self, dialog_id: int, user_id: int,
+                           limit: int, offset: int) -> Sequence[Message]:
         raise NotImplementedError
 
 
