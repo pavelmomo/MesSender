@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from .dependencies import (UOW, DialogService,
-                                  MessageService, Paginator)
+                           MessageService, Paginator)
 
 from src.schemas import (DialogCreateRespDTO, CommonStatusDTO,
                          MessageCreateDTO, MessageDTO)

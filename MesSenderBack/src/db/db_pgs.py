@@ -3,17 +3,15 @@ from sqlalchemy.ext.asyncio import (async_sessionmaker,
                                     AsyncSession,
                                     AsyncEngine)
 from src.config import (DB_HOST,
-                      DB_PORT,
-                      DB_NAME,
-                      DB_USER,
-                      DB_PASS)
+                        DB_PORT,
+                        DB_NAME,
+                        DB_USER,
+                        DB_PASS)
 
-from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import insert
 
 
-class Base(DeclarativeBase):
-    pass
+
 
 
 class DatabasePgs:
@@ -21,7 +19,6 @@ class DatabasePgs:
     session_factory: async_sessionmaker
     url = f'postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 
-    # self.url = 'sqlite+aiosqlite:///db/messenger.db'
     @classmethod
     async def init_db(cls):
         DatabasePgs.engine = create_async_engine(
@@ -52,8 +49,8 @@ class DatabasePgs:
             await conn.execute(
                 insert(DialogUser),
                 [
-                    {'dialog_id': 1, 'user_id': 2, 'remote_uid': 1 },
-                    {'dialog_id': 1, 'user_id': 1, 'remote_uid': 2  }
+                    {'dialog_id': 1, 'user_id': 2, 'remote_uid': 1},
+                    {'dialog_id': 1, 'user_id': 1, 'remote_uid': 2}
                 ]
             )
             await conn.commit()
