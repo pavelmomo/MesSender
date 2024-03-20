@@ -45,10 +45,9 @@ class DialogRepositoryPgs(AbstractDialogRepository):
                  )
         result = await self.session.execute(query)
         result = result.scalars().first()
-        if result is None:
-            return -1
-        else:
-            return result.dialog_id
+        return -1 if result is None \
+            else result.dialog_id
+
 
     async def check_dialog_user_existing(self, dialog_id: int, user_id: int) -> bool:
         query = (select(DialogUser)
@@ -58,17 +57,15 @@ class DialogRepositoryPgs(AbstractDialogRepository):
                  )
         result = await self.session.execute(query)
         result = result.scalars().all()
-        if len(result) == 0:
-            return False
-        else:
-            return True
+        return False if len(result) == 0 \
+            else True
+
 
     async def check_dialog_existing(self, dialog_id: int) -> bool:
         dialog = await self.session.get(Dialog,dialog_id)
-        if dialog is None:
-            return False
-        else:
-            return True
+        return False if dialog is None \
+            else True
+
 
     async def create_dual_dialog(self, user_id: int, remote_user_id: int) -> int:
         new_dialog = Dialog()
