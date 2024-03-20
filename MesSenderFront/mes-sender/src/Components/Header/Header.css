@@ -1,0 +1,18 @@
+.Header {
+    background-color: #282c34;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(10px + 2vmin);
+    color: white;
+  }
+  .menu {
+    flex-grow: 1;
+  }
+  .menu ul {
+    display: flex;
+    flex-flow: row nowrap;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
