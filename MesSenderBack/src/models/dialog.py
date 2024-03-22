@@ -1,13 +1,9 @@
 import enum
+import datetime
 from typing import Optional
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, text
 from . import Base, User
-
-
-class DialogStatus(enum.Enum):
-    default = 'default',
-    hidden = 'hidden'
 
 
 class DialogUser(Base):
@@ -16,15 +12,14 @@ class DialogUser(Base):
         ForeignKey("dialogs.id"),
         primary_key=True
     )
+    border_date : Mapped[datetime.datetime] \
+        = mapped_column(server_default=text("TIMEZONE('utc',now())"))
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id"),
         primary_key=True
     )
     remote_uid: Mapped[Optional[int]] = mapped_column(
         ForeignKey("users.id")
-    )
-    status: Mapped["DialogStatus"] = mapped_column(
-        default=DialogStatus.default
     )
     user: Mapped["User"] = relationship(
         "User", foreign_keys=[user_id]

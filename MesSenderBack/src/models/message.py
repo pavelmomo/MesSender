@@ -6,8 +6,7 @@ from . import Base
 
 class MessageStatus(enum.Enum):
     not_viewed = 'not_viewed',
-    viewed = 'viewed',
-    hidden = 'hidden'
+    viewed = 'viewed'
 
 class Message(Base):
     __tablename__ = "messages"

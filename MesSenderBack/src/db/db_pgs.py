@@ -10,8 +10,7 @@ from src.config import (DB_HOST,
 
 from sqlalchemy import insert
 
-
-
+from src.models import Message
 
 
 class DatabasePgs:
@@ -51,6 +50,13 @@ class DatabasePgs:
                 [
                     {'dialog_id': 1, 'user_id': 2, 'remote_uid': 1},
                     {'dialog_id': 1, 'user_id': 1, 'remote_uid': 2}
+                ]
+            )
+            await conn.execute(
+                insert(Message),
+                [
+                    {'user_id': 1, 'dialog_id': 1, 'text': "Hello!"},
+                    {'user_id': 2, 'dialog_id': 1, 'text': "Goodbye!"}
                 ]
             )
             await conn.commit()

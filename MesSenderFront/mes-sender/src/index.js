@@ -2,11 +2,10 @@ import React, { useState } from "react";
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
-import logo from './logo.svg';
-import './App.css';
-import MessageList from './Components/Message/Message';
+import MessageList from './Components/Message/MessageList';
 
 function App() {
+
   const [messages, setMessages] = useState([]);
 
   return (

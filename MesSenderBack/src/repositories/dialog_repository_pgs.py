@@ -4,7 +4,6 @@ from src.models import Dialog, User, DialogUser, Message
 from sqlalchemy import insert, select, update, or_, and_
 from sqlalchemy.orm import joinedload, contains_eager
 from . import AbstractDialogRepository
-from src.models import DialogStatus
 
 
 class DialogRepositoryPgs(AbstractDialogRepository):
@@ -13,18 +12,17 @@ class DialogRepositoryPgs(AbstractDialogRepository):
 
     async def get_user_dialogs(self, user_id: int, limit: int, offset: int) -> Sequence[DialogUser]:
         subquery = (select(Message.id)
-                    .filter(Message.dialog_id == Dialog.id)
+                    .filter(and_(Message.dialog_id == Dialog.id, Message.created_at > DialogUser.border_date))
                     .order_by(Message.created_at.desc())
                     .limit(1)
                     .scalar_subquery()
-                    .correlate(Dialog)
+                    .correlate(Dialog, DialogUser)
                     )
         query = (select(DialogUser)
                  .join(DialogUser.dialog)
                  .filter(and_(Dialog.is_multiply == False,
-                              DialogUser.user_id == user_id,
-                              DialogUser.status == DialogStatus.default))
-                 .outerjoin(Message, Message.id == subquery)
+                              DialogUser.user_id == user_id))
+                 .join(Message, Message.id == subquery)  # замена с outerjoin, вывод только диалогов с посл. сообщением
                  .outerjoin(User, User.id == DialogUser.remote_uid)
                  .options(contains_eager(DialogUser.remote_user))
                  .options(contains_eager(DialogUser.dialog,
@@ -48,7 +46,6 @@ class DialogRepositoryPgs(AbstractDialogRepository):
         return -1 if result is None \
             else result.dialog_id
 
-
     async def check_dialog_user_existing(self, dialog_id: int, user_id: int) -> bool:
         query = (select(DialogUser)
                  .filter(and_(DialogUser.user_id == user_id,
@@ -60,12 +57,10 @@ class DialogRepositoryPgs(AbstractDialogRepository):
         return False if len(result) == 0 \
             else True
 
-
     async def check_dialog_existing(self, dialog_id: int) -> bool:
-        dialog = await self.session.get(Dialog,dialog_id)
+        dialog = await self.session.get(Dialog, dialog_id)
         return False if dialog is None \
             else True
-
 
     async def create_dual_dialog(self, user_id: int, remote_user_id: int) -> int:
         new_dialog = Dialog()
