@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy import delete
+from sqlalchemy import delete, update
 
 from src.db.db_pgs import DatabasePgs
 from .dependencies import (UOW, DialogService,
                            MessageService, Paginator)
 
 from src.schemas import (DialogCreateRespDTO, CommonStatusDTO,
-                         MessageCreateDTO, MessageDTO)
-from ..models import Message
+                         MessageCreateDTO, MessageDTO, MessageUpdateDTO)
+from src.models import Message
 
 router = APIRouter(
     prefix="/api/messages",
@@ -24,4 +24,29 @@ async def delete_message(id: int):
         await session.commit()
     return {'status': False if result is None else True}
 
+@router.post("/")
+async def create_message(message: MessageCreateDTO):
+    async with DatabasePgs.session_factory() as session:
+        mes = Message(user_id = message.user_id,
+                            text = message.text,
+                            dialog_id= message.dialog_id)
+        session.add(mes)
+        await session.commit()
 
+    return {'status': False if mes.id is None else True,
+            'id': mes.id,
+            'created_at': mes.created_at}
+
+@router.put("/")
+async def update_message(message: MessageUpdateDTO):
+    async with DatabasePgs.session_factory() as session:
+
+        query = (update(Message)
+                 .where(Message.id == message.id)
+                 .values(text = message.text)
+                 .returning(Message.id))
+
+        mes_id = await session.execute(query)
+        await session.commit()
+
+    return {'status': True if mes_id is not None else False }

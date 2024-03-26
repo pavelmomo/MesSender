@@ -18,3 +18,7 @@ class MessageDTO(BaseModel):
     text: str
     status: MessageStatus
     created_at: datetime.datetime
+
+class MessageUpdateDTO(BaseModel):
+    id: int
+    text: str

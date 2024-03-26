@@ -10,7 +10,7 @@ class DialogRepositoryPgs(AbstractDialogRepository):
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_user_dialogs(self, user_id: int, limit: int, offset: int) -> Sequence[DialogUser]:
+    async def get_active_user_dialogs(self, user_id: int, limit: int, offset: int) -> Sequence[DialogUser]:
         subquery = (select(Message.id)
                     .filter(and_(Message.dialog_id == Dialog.id, Message.created_at > DialogUser.border_date))
                     .order_by(Message.created_at.desc())

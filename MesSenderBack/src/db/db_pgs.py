@@ -1,3 +1,5 @@
+import datetime
+
 from sqlalchemy.ext.asyncio import (async_sessionmaker,
                                     create_async_engine,
                                     AsyncSession,
@@ -55,8 +57,8 @@ class DatabasePgs:
             await conn.execute(
                 insert(Message),
                 [
-                    {'user_id': 1, 'dialog_id': 1, 'text': "Hello!"},
-                    {'user_id': 2, 'dialog_id': 1, 'text': "Goodbye!"}
+                    {'user_id': 1, 'dialog_id': 1, 'text': "Hello!", 'created_at': datetime.datetime.utcnow()},
+                    {'user_id': 2, 'dialog_id': 1, 'text': "Goodbye!", 'created_at': datetime.datetime.utcnow()}
                 ]
             )
             await conn.commit()

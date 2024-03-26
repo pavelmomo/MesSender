@@ -11,6 +11,6 @@ router = APIRouter(
 
 
 @router.get("/{id}/dialogs", response_model=list[DialogDTO])  # получение списка диалогов пользователя
-async def get_user_dialogs(id: int, uow: UOW, paginator: Paginator = Depends()):
-    result = await DialogService.get_user_dialogs(uow, id, paginator.limit, paginator.offset)
+async def get_active_user_dialogs(id: int, uow: UOW, paginator: Paginator = Depends()):
+    result = await DialogService.get_active_user_dialogs(uow, id, paginator.limit, paginator.offset)
     return result

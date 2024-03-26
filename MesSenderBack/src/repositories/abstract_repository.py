@@ -19,7 +19,7 @@ class AbstractDialogRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_user_dialogs(self, user_id: int, limit: int, offset: int) -> Sequence[DialogUser]:
+    async def get_active_user_dialogs(self, user_id: int, limit: int, offset: int) -> Sequence[DialogUser]:
         raise NotImplementedError
 
     @abstractmethod

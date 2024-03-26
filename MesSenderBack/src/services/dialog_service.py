@@ -1,18 +1,18 @@
 from typing import List
 from src.repositories import AbstractUOW
-from src.schemas import (DialogDTO,DialogViewStatus,
-                       DialogCreateRespDTO, CommonStatusDTO)
+from src.schemas import (DialogDTO, DialogViewStatus,
+                         DialogCreateRespDTO, CommonStatusDTO)
 from src.models import MessageStatus
 
 
 class DialogService:
     @classmethod
-    async def get_user_dialogs(cls, uow: AbstractUOW, user_id: int, limit: int, offset: int) -> List[DialogDTO]:
+    async def get_active_user_dialogs(cls, uow: AbstractUOW, user_id: int, limit: int, offset: int) -> List[DialogDTO]:
         async with uow:
             user_check = await uow.users.check_user_existing(user_id)
             if not user_check:
                 return []
-            dialogs = await uow.dialogs.get_user_dialogs(user_id, limit, offset)
+            dialogs = await uow.dialogs.get_active_user_dialogs(user_id, limit, offset)
             dialogs_dto = []
             for d in dialogs:
                 dialog_dict = {'id': d.dialog_id,
@@ -33,7 +33,7 @@ class DialogService:
             result = await uow.dialogs.get_dual_dialog_id(uid, remote_uid)
             if result < 0:
                 return CommonStatusDTO(success=False)
-            return CommonStatusDTO(success=True,id=result)
+            return CommonStatusDTO(success=True, id=result)
 
     @classmethod
     async def hide_dialog(cls, dialog_id: int, user_id):
@@ -45,6 +45,8 @@ class DialogService:
 
     @classmethod
     async def create_dual_dialog(cls, uow: AbstractUOW, uid: int, remote_uid: int) -> DialogCreateRespDTO:
+        if (uid == remote_uid):
+            return DialogCreateRespDTO(is_created=False)
         async with uow:
             uid_check = await uow.users.check_user_existing(uid)
             remote_uid_check = await uow.users.check_user_existing(remote_uid)

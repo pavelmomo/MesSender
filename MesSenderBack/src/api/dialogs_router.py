@@ -12,7 +12,7 @@ router = APIRouter(
 
 
 @router.get("/", response_model=CommonStatusDTO)  # получение id диалога по id участников
-async def get_dialog_id(uid: int, remote_uid: int, uow: UOW):
+async def check_dual_dialog_existing(uid: int, remote_uid: int, uow: UOW):
     result = await DialogService.get_dual_dialog_id(uow, uid, remote_uid)
     return result
 
