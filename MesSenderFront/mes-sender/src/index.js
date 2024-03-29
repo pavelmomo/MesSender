@@ -1,27 +1,14 @@
-import React, { useState } from "react";
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import reportWebVitals from './reportWebVitals';
-import MessageList from './Components/Message/MessageList';
-import MessageAdd from './Components/Message/MessageAdd';
+import "@fontsource/roboto/300.css";
+import "@fontsource/roboto/400.css";
+import "@fontsource/roboto/500.css";
+import "@fontsource/roboto/700.css";
+import App from "./App";
+import ReactDOM from "react-dom/client";
+import "./index.css";
 
-function App() {
-
-  const [messages, setMessages] = useState([]);
-
-  return (
-    <div className="app">
-      <MessageList messages={messages} setMessages={setMessages}></MessageList>
-      <MessageAdd messages={messages} setMessages={setMessages}></MessageAdd>
-    </div>
-  );
-}
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <>
     <App />
   </>
 );
-
-reportWebVitals();
