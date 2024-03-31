@@ -1,0 +1,28 @@
+.mainContainer {
+  display: flex;
+  flex: 10;
+  justify-content: space-evenly;
+  flex-wrap: nowrap;
+  height: 100vh;
+  min-height: 500px;
+}
+
+.dialogListContainer {
+  min-width: 350px;
+  height: 95%;
+  width: 40%;
+  overflow: auto;
+}
+
+&::-webkit-scrollbar {
+  display: none;
+}
+.mainDialogContainer {
+  height: 80%;
+  width: 50%;
+  margin-top: 15px;
+  border: 3px solid;
+  border-color: var(--main-color);
+  border-radius: 3px;
+  box-shadow: 1px 1px 3px 0px #8faee3;
+}

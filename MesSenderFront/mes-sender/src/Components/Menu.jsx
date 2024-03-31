@@ -1,62 +1,80 @@
 import React, { useState } from "react";
-import MailIcon from "@mui/icons-material/Mail";
+
 import HailTwoToneIcon from "@mui/icons-material/HailTwoTone";
 import AccountCircleTwoToneIcon from "@mui/icons-material/AccountCircleTwoTone";
 import SmsTwoToneIcon from "@mui/icons-material/SmsTwoTone";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import {
-  Drawer,
+  Box,
   ListItemText,
   ListItemButton,
   ListItemIcon,
   Typography,
-  List,
-  ListItem,
 } from "@mui/material/";
 
 const TextStyle = {
   color: "primary.contrast",
 };
+const ButtonStyle = {
+  boxShadow: "0px 1px 3px 0px rgba(99,112,143,0.75)",
+  bgcolor: "secondary.lastMessage",
+};
 
 export default function Menu({ isOpen, setOpen }) {
-  const DrawerList = (
-    <List sx={{ width: 300 }}>
-      <ListItem sx={{ justifyContent: "center", m: 1 }}>
-        <Typography variant="h6" sx={TextStyle}>
-          Меню
-        </Typography>
-      </ListItem>
-      <ListItem>
-        <ListItemButton>
-          <ListItemIcon>
-            <SmsTwoToneIcon />
-          </ListItemIcon>
-          <ListItemText primary="Диалоги" sx={TextStyle} />
-        </ListItemButton>
-      </ListItem>
-      <ListItem>
-        <ListItemButton>
+  return (
+    <Box
+      bgcolor={"secondary.menu"}
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100vh",
+        flex: 2,
+        boxShadow: "1px 1px 3px 1px rgba(99,112,143,0.75)",
+      }}
+    >
+      <Typography
+        variant="h5"
+        sx={TextStyle}
+        flex={1}
+        textAlign={"center"}
+        m={3}
+      >
+        Me$$ender <Box> ¯\_(ツ)_/¯</Box>
+      </Typography>
+
+      <Box display="flex" flex={1}>
+        <ListItemButton sx={ButtonStyle}>
           <ListItemIcon>
             <HailTwoToneIcon />
           </ListItemIcon>
           <ListItemText primary="Люди" sx={TextStyle} />
         </ListItemButton>
-      </ListItem>
-      <ListItem>
-        <ListItemButton>
+      </Box>
+      <Box display="flex" flex={1}>
+        <ListItemButton sx={ButtonStyle}>
+          <ListItemIcon>
+            <SmsTwoToneIcon />
+          </ListItemIcon>
+          <ListItemText primary="Диалоги" sx={TextStyle} />
+        </ListItemButton>
+      </Box>
+      <Box display="flex" flex={1}>
+        <ListItemButton sx={ButtonStyle}>
           <ListItemIcon>
             <AccountCircleTwoToneIcon />
           </ListItemIcon>
           <ListItemText primary="Профиль" sx={TextStyle} />
         </ListItemButton>
-      </ListItem>
-    </List>
-  );
-
-  return (
-    <>
-      <Drawer open={isOpen} onClose={() => setOpen(false)}>
-        {DrawerList}
-      </Drawer>
-    </>
+      </Box>
+      <Box display="flex" flex={11}></Box>
+      <Box display="flex" flex={1}>
+        <ListItemButton sx={ButtonStyle}>
+          <ListItemIcon>
+            <ExitToAppIcon />
+          </ListItemIcon>
+          <ListItemText primary="Выход" sx={TextStyle} />
+        </ListItemButton>
+      </Box>
+    </Box>
   );
 }

@@ -1,0 +1,7 @@
+.textFieldBase {
+  border-radius: 8px;
+  border-color: var(--secondary-color);
+  height: 60%;
+  font-size: 15px;
+  opacity: 0.6;
+}

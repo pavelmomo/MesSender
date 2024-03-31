@@ -1,5 +1,6 @@
-import uvicorn
 import sys
+import uvicorn
+
 
 if __name__ == "__main__":
     sys.path.append(".")  # добавление пути проекта в path ( для VSCode)

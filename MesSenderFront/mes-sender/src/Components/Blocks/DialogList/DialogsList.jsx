@@ -1,18 +1,17 @@
 import { Box, Card, Grid, List, ListItem } from "@mui/material";
 import React, { useState } from "react";
-import DialogCard from "./DialogCard";
-import { Padding } from "@mui/icons-material";
+import DialogCard from "../DialogCard/DialogCard";
 
 export default function DialogsList({ dialogs }) {
   return (
-    <List>
+    <ul style={{ listStyle: "none" }}>
       {dialogs.map((dialog) => {
         return (
-          <ListItem key={dialog.id} disablePadding>
+          <li key={dialog.id}>
             <DialogCard dialog={dialog} />
-          </ListItem>
+          </li>
         );
       })}
-    </List>
+    </ul>
   );
 }

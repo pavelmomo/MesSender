@@ -1,0 +1,49 @@
+.dialogContainerStyle {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  flex-direction: column;
+}
+
+.messageListContainerStyle {
+  flex: 7;
+  display: flex;
+  border-bottom: 3px solid;
+  border-top: 3px solid;
+  border-color: var(--main-color);
+  overflow: auto;
+}
+
+.messageList {
+  word-break: break-all;
+  padding: 0px;
+  display: flex;
+  list-style: none;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+}
+
+.messageContainer {
+  display: flex;
+  align-items: center;
+  margin: 10px;
+}
+
+.messageIconContainer {
+  margin-left: 12px;
+  margin-right: 20px;
+  width: 25px;
+  display: flex;
+  align-items: center;
+}
+.messageContent {
+  margin: 0px;
+  flex: 1;
+}
+.inputContainer {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 16px;
+}

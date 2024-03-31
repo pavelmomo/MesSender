@@ -1,0 +1,32 @@
+.mainContainer {
+  width: 90%;
+  height: 80px;
+  display: flex;
+  border: 2px solid;
+  border-color: var(--main-color);
+  border-radius: 1;
+  box-shadow: 1px 1px 3px 0px var(--shadow-color);
+}
+.lastMessage {
+  font-size: 14px;
+  margin: 0;
+  padding-left: 3px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-right: 5px;
+  border-radius: 4px;
+  background-color: var(--secondary-color);
+  width: fit-content;
+}
+
+.iconContainer {
+  align-self: center;
+  text-align: center;
+  margin: 30px;
+}
+.messageContainer {
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
