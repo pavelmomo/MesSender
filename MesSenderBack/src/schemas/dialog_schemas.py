@@ -3,6 +3,9 @@ from typing import Optional
 
 from pydantic import BaseModel
 
+class CreateStatus(enum.Enum):
+    created = 'created'
+    existed = 'existed'
 
 class DialogViewStatus(enum.Enum):
     not_viewed = 'not_viewed',
@@ -17,5 +20,5 @@ class DialogDTO(BaseModel):
 
 
 class DialogCreateRespDTO(BaseModel):
-    is_created: bool
+    status: CreateStatus
     dialog_id: Optional[int] = None

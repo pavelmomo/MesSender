@@ -4,6 +4,7 @@ from . import (AbstractUOW,
                UserRepositoryPgs,
                DialogRepositoryPgs)
 
+
 class UnitOfWorkPgs(AbstractUOW):
 
     def __init__(self):

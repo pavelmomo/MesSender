@@ -1,16 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import Sequence
+
+from fastapi_users_db_sqlalchemy import BaseUserDatabase
+
 from src.models import Dialog, DialogUser, Message
-
-
-class AbstractUserRepository(ABC):
-    @abstractmethod
-    def __init__(self):
-        raise NotImplementedError
-
-    @abstractmethod
-    async def check_user_existing(self, user_id: int) -> bool:
-        raise NotImplementedError
 
 
 class AbstractDialogRepository(ABC):
@@ -30,12 +23,25 @@ class AbstractDialogRepository(ABC):
     async def check_dialog_user_existing(self, dialog_id: int, user_id: int) -> bool:
         raise NotImplementedError
 
-    @abstractmethod
-    async def check_dialog_existing(self, dialog_id: int) -> bool:
-        raise NotImplementedError
 
     @abstractmethod
     async def create_dual_dialog(self, user_id: int, remote_user_id: int) -> int:
+        raise NotImplementedError
+
+
+class AbstractUserRepository(ABC, BaseUserDatabase):
+    @abstractmethod
+    def __init__(self):
+        raise NotImplementedError
+    @abstractmethod
+    def get_by_username(self, username: str):
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_by_username_or_email(self, username: str, email: str):
+        raise NotImplementedError
+    @abstractmethod
+    async def check_user_existing(self, user_id: int) -> bool:
         raise NotImplementedError
 
 
@@ -58,7 +64,6 @@ class AbstractUOW(ABC):
     users: AbstractUserRepository
     messages: AbstractMessageRepository
     dialogs: AbstractDialogRepository
-
     @abstractmethod
     def __init__(self):
         raise NotImplementedError

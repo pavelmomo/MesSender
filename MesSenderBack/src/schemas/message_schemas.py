@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 class MessageCreateDTO(BaseModel):
     dialog_id: Optional[int] = None
-    user_id: int
+    user_id: Optional[int] = None
     text: str
 
 

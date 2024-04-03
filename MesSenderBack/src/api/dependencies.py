@@ -1,10 +1,9 @@
 from typing import Annotated
 from fastapi import Depends
 from pydantic import BaseModel, Field
-
+from src.models import User
 from src.repositories import UnitOfWorkPgs, AbstractUOW
-from src.services import DialogService, MessageService
-
+from src.services import AuthServiceInstance
 
 class Paginator(BaseModel):
     limit: Annotated[int, Field(ge=0)]
@@ -15,3 +14,6 @@ class Paginator(BaseModel):
 
 
 UOW = Annotated[AbstractUOW, Depends(UnitOfWorkPgs)]
+
+
+CurrentUser = Annotated[User, Depends(AuthServiceInstance.current_user)]
