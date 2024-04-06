@@ -1,7 +1,7 @@
 .mainContainer {
   display: flex;
   flex-direction: column;
-  height: "100vh";
+  max-width: 300px;
   flex: 2;
   box-shadow: 1px 1px 3px 1px var(--shadow-color);
   background-color: var(--main-color);
@@ -9,5 +9,7 @@
 .mainLogo {
   font-weight: 600;
   margin: 2px;
-  color: var(--contrast-color);
+  color: var(--secondary-color);
+  font-size: 23px;
+  font-weight: 600;
 }

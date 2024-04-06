@@ -1,7 +1,7 @@
 from typing import List
 from src.repositories import AbstractUOW
 from src.schemas import (DialogDTO, DialogViewStatus,
-                         DialogCreateRespDTO, CommonStatusDTO)
+                         DialogCreateRespDTO, CommonStatusDTO, MessageDTO)
 from src.models import MessageStatus
 
 

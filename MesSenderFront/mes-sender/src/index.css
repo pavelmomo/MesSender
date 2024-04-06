@@ -4,6 +4,7 @@
   --secondary-color: rgb(236, 239, 241);
   --contrast-color: rgb(69, 90, 100);
   --shadow-color: rgba(129, 153, 165, 0.839);
+  --background-color: white;
 }
 
 body {

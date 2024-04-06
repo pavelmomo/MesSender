@@ -1,3 +1,4 @@
+import datetime
 from abc import ABC, abstractmethod
 from typing import Sequence
 
@@ -58,7 +59,9 @@ class AbstractMessageRepository(ABC):
     async def get_messages(self, dialog_id: int, user_id: int,
                            limit: int, offset: int) -> Sequence[Message]:
         raise NotImplementedError
-
+    @abstractmethod
+    async def get_last_message_datetime(self, user_id: int) -> datetime.datetime | None:
+        raise NotImplementedError
 
 class AbstractUOW(ABC):
     users: AbstractUserRepository

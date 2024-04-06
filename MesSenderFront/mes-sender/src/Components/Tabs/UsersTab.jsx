@@ -8,7 +8,7 @@ export default function UsersTab() {
         flexDirection: "row",
         alignItems: "flex-start",
         justifyContent: "center",
-        flex: 11,
+        flex: 10,
       }}
     >
       <div

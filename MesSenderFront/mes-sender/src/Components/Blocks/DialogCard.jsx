@@ -1,12 +1,18 @@
 import { EmailSharp, EmojiPeopleOutlined } from "@mui/icons-material";
-
-import React, { useState } from "react";
-import { stringLimit } from "../../../Utils";
-import styles from "./DialogCard.module.css";
+import { DialogsContext } from "../Tabs/DialogsTab";
+import React, { useContext, useState } from "react";
+import { stringLimit } from "../../Utils";
+import styles from "../Styles/DialogCard.module.css";
 
 export default function DialogCard({ dialog }) {
+  const { setCurrentDialog } = useContext(DialogsContext);
+
+  function chooseDialog() {
+    setCurrentDialog(dialog);
+  }
+
   return (
-    <div className={styles.mainContainer}>
+    <button className={styles.mainContainer} onClick={chooseDialog}>
       <div className={styles.iconContainer}>
         {dialog.view_status === "not_viewed" ? (
           <EmailSharp />
@@ -20,6 +26,6 @@ export default function DialogCard({ dialog }) {
           {stringLimit(dialog.last_message, 30)}
         </h6>
       </div>
-    </div>
+    </button>
   );
 }

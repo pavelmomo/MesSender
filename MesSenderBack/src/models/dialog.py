@@ -3,7 +3,7 @@ import datetime
 from typing import Optional
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey, text
-from . import Base, User
+from . import Base
 
 
 class DialogUser(Base):

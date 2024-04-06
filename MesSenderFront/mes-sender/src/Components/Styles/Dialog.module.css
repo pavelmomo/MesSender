@@ -12,16 +12,18 @@
   border-top: 3px solid;
   border-color: var(--main-color);
   overflow: auto;
+  scroll-behavior: smooth;
 }
 
 .messageList {
   word-break: break-all;
-  padding: 0px;
+  height: fit-content;
+  min-height: 90%;
+  padding: 5px;
   display: flex;
   list-style: none;
   flex-direction: column;
   justify-content: flex-end;
-  height: 100%;
 }
 
 .messageContainer {
@@ -46,4 +48,20 @@
   display: flex;
   align-items: center;
   padding: 16px;
+}
+
+.emptyContainerStyle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.emptyTextStyle {
+  text-align: center;
+  color: var(--main-color);
+}
+
+.messageListContainerStyle::-webkit-scrollbar {
+  display: none;
 }

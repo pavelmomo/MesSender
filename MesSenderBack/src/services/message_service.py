@@ -1,7 +1,7 @@
 from src.repositories import AbstractUOW
 from src.models import MessageStatus, Message
 from src.schemas import (MessageCreateDTO, CommonStatusDTO,
-                         MessageDTO)
+                         MessageDTO, MessageCheckDTO)
 
 
 class MessageService:
@@ -22,9 +22,15 @@ class MessageService:
     async def get_dialog_messages(uow: AbstractUOW, dialog_id: int, user_id: int,
                                   limit: int, offset: int) -> list[MessageDTO] | None:
         async with uow:
-            # check_dialog = await uow.dialogs.check_dialog_user_existing(dialog_id, user_id)
-            # if not check_dialog:
-            #     return None
             messages = await uow.messages.get_messages(dialog_id, user_id, limit, offset)
             messages_dto = [MessageDTO.model_validate(m, from_attributes=True) for m in messages[::-1]]
             return messages_dto
+
+    @staticmethod
+    async def get_last_message_datetime(uow: AbstractUOW, user_id : int) -> MessageCheckDTO | None:
+        async with uow:
+            result = await uow.messages.get_last_message_datetime(user_id)
+            if not result:
+                return MessageCheckDTO(has_messages=False)
+
+            return MessageCheckDTO(has_messages=True, last_message_datetime=result)

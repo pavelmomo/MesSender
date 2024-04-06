@@ -1,33 +1,17 @@
-import React, { useState, useEffect } from "react";
-import DialogsList from "../Blocks/DialogList/DialogsList";
-import Dialog from "../Blocks/Dialog/Dialog";
-import styles from "./Dialogs.module.css";
+import React, { useState, useEffect, useContext, createContext } from "react";
+import DialogsList from "../Blocks/DialogsList";
+import Dialog from "../Blocks/Dialog";
+import styles from "./DialogsTab.module.css";
 
-const EmptyDialog = (
-  <div
-    style={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      height: "100%",
-    }}
-  >
-    <p
-      textAlign="center"
-      color="var(--main-color)"
-      style={{ textAlign: "center", color: "var(--main-color)" }}
-    >
-      Диалог не выбран
-    </p>
-  </div>
-);
+export const DialogsContext = createContext(null);
 
 export default function DialogsTab() {
   const [dialogs, setDialogs] = useState([]);
+  const [currentDialog, setCurrentDialog] = useState(null);
+
   useEffect(() => {
     async function loadDialogs() {
-      const url = "http://localhost:8000/api/users/1/dialogs";
-      let dialogs = await fetch(url).then(
+      const dialogs = await fetch("/api/dialogs/").then(
         (response) => response.json(),
         () => console.log("Response error!")
       );
@@ -35,14 +19,19 @@ export default function DialogsTab() {
     }
     loadDialogs();
   }, []);
+
   return (
-    <div className={styles.mainContainer}>
-      <div className={styles.dialogListContainer}>
-        {dialogs.length && <DialogsList dialogs={dialogs} />}
+    <DialogsContext.Provider
+      value={{ dialogs, setDialogs, currentDialog, setCurrentDialog }}
+    >
+      <div className={styles.mainContainer}>
+        <div className={styles.dialogListContainer}>
+          <DialogsList />
+        </div>
+        <div className={styles.mainDialogContainer}>
+          <Dialog />
+        </div>
       </div>
-      <div className={styles.mainDialogContainer}>
-        <Dialog />
-      </div>
-    </div>
+    </DialogsContext.Provider>
   );
 }

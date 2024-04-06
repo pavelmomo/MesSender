@@ -1,7 +1,10 @@
+import datetime
 from typing import Sequence
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.models import Message, MessageStatus, Dialog, DialogUser
-from sqlalchemy import select, update, and_
+from sqlalchemy.orm import contains_eager
+
+from src.models import Message, MessageStatus, Dialog, DialogUser, User
+from sqlalchemy import select, update, and_, text
 from . import AbstractMessageRepository
 
 
@@ -29,5 +32,16 @@ class MessageRepositoryPgs(AbstractMessageRepository):
             if message.status == MessageStatus.not_viewed and message.user_id != user_id:
                 message.status = MessageStatus.viewed
         await self.session.commit()
-
         return messages
+
+    async def get_last_message_datetime(self, user_id: int) -> datetime.datetime | None:
+        query = \
+        """select m.created_at  from messages m 
+            inner join dialogs d on m.dialog_id = d.id
+            inner join dialogs_users du on d.id = du.dialog_id
+                where du.user_id = :uid
+                order by m.created_at desc 
+                limit 1
+        """
+        dateTime = await self.session.scalar(text(query), { 'uid': user_id })
+        return dateTime
