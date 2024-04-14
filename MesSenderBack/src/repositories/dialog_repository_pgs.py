@@ -11,19 +11,25 @@ class DialogRepositoryPgs(AbstractDialogRepository):
         self.session = session
 
     async def get_active_user_dialogs(self, user_id: int, limit: int, offset: int) -> Sequence[DialogUser]:
-        subquery = (select(Message.id)
-                    .filter(and_(Message.dialog_id == Dialog.id, Message.created_at > DialogUser.border_date))
-                    .order_by(Message.created_at.desc())
-                    .limit(1)
-                    .scalar_subquery()
-                    .correlate(Dialog, DialogUser)
-                    )
+        subqueryM = (select(Message.id)
+                     .filter(and_(Message.dialog_id == Dialog.id, Message.created_at > DialogUser.border_date))
+                     .order_by(Message.created_at.desc())
+                     .limit(1)
+                     .scalar_subquery()
+                     .correlate(Dialog, DialogUser)
+                     )
+        subqueryD = (select(DialogUser.user_id)
+                     .filter(
+            and_(DialogUser.dialog_id == Dialog.id, DialogUser.user_id != user_id, Dialog.is_multiply == False))
+                     .limit(1)
+                     .scalar_subquery()
+                     .correlate(Dialog)
+                     )
         query = (select(DialogUser)
                  .join(DialogUser.dialog)
-                 .filter(and_(Dialog.is_multiply == False,
-                              DialogUser.user_id == user_id))
-                 .join(Message, Message.id == subquery)  # замена с outerjoin, вывод только диалогов с посл. сообщением
-                 .outerjoin(User, User.id == DialogUser.remote_uid)
+                 .filter(DialogUser.user_id == user_id)
+                 .join(Message, Message.id == subqueryM)  # замена с outerjoin, вывод только диалогов с посл. сообщением
+                 .outerjoin(User, User.id == subqueryD)
                  .options(contains_eager(DialogUser.remote_user))
                  .options(contains_eager(DialogUser.dialog,
                                          Dialog.messages))
@@ -36,9 +42,14 @@ class DialogRepositoryPgs(AbstractDialogRepository):
         return result.unique().scalars().all()
 
     async def get_dual_dialog_id(self, uid: int, remote_uid: int) -> int:
+        subquery = (select(DialogUser.dialog_id)
+                    .filter(DialogUser.user_id == remote_uid)
+                    )
         query = (select(DialogUser)
+                 .join(DialogUser.dialog)
                  .filter(and_(DialogUser.user_id == uid,
-                              DialogUser.remote_uid == remote_uid))
+                              Dialog.is_multiply == False,
+                              DialogUser.dialog_id.in_(subquery)))
                  .limit(1)
                  )
         result = await self.session.execute(query)
@@ -46,29 +57,22 @@ class DialogRepositoryPgs(AbstractDialogRepository):
         return -1 if result is None \
             else result.dialog_id
 
-    async def check_dialog_user_existing(self, dialog_id: int, user_id: int) -> bool:
-        query = (select(DialogUser)
-                 .filter(and_(DialogUser.user_id == user_id,
-                              DialogUser.dialog_id == dialog_id))
-                 .limit(1)
-                 )
-        result = await self.session.execute(query)
-        result = result.scalars().one_or_none()
-        return False if result is None \
-            else True
-
-
     async def create_dual_dialog(self, user_id: int, remote_user_id: int) -> int:
         new_dialog = Dialog()
         self.session.add(new_dialog)
         await self.session.flush()
         new_dialog_users = [DialogUser(dialog_id=new_dialog.id,
-                                       user_id=user_id,
-                                       remote_uid=remote_user_id),
+                                       user_id=user_id),
                             DialogUser(dialog_id=new_dialog.id,
-                                       user_id=remote_user_id,
-                                       remote_uid=user_id)
+                                       user_id=remote_user_id)
                             ]
         self.session.add_all(new_dialog_users)
         await self.session.commit()
         return new_dialog.id
+
+    async def get_dialog_users(self, dialog_id: int) -> list[int]:
+        query = (select(DialogUser.user_id)
+                 .filter(DialogUser.dialog_id == dialog_id))
+        users = await self.session.scalars(query)
+        users = users.all()
+        return users

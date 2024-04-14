@@ -1,4 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Query, WebSocketException
+from starlette import status
+from starlette.websockets import WebSocket
 
 from src.schemas import CommonStatusDTO, MessageCheckDTO, MessageCreateDTO, MessageDTO
 from src.services import MessageService
@@ -42,3 +46,19 @@ async def get_messages(
     if result is None:
         raise HTTPException(status_code=403, detail="Incorrect parameters")
     return result
+
+
+async def authorize_ws_endpoint(
+    websocket: WebSocket,
+    token: Annotated[str, Query()] = None,
+):
+    if token is None:
+        raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
+    return token
+
+@router.websocket("/messages/ws")
+async def websocket_endpoint(websocket: WebSocket, user: CurrentUser):
+    await websocket.accept()
+    while True:
+        data = await websocket.receive_text()
+        await websocket.send_text(f"Message text was: {data}")

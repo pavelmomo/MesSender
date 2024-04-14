@@ -11,12 +11,15 @@ class MessageService:
                                   user_id=message.user_id,
                                   text=message.text)
         async with uow:
-            result = await uow.dialogs.check_dialog_user_existing(message.dialog_id,
-                                                                  message.user_id)
-            if not result:
+            ids_list = await uow.dialogs.get_dialog_users(message.dialog_id)
+            if message.user_id not in ids_list:
                 return None
             message_id = await uow.messages.send_message(message_to_send)
+
+            #отправка в вебсокет сообщения активному пользователю
+
             return CommonStatusDTO(success=True, id=message_id)
+
 
     @staticmethod
     async def get_dialog_messages(uow: AbstractUOW, dialog_id: int, user_id: int,

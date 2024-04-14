@@ -22,7 +22,7 @@ async def get_active_user_dialogs(
     return result
 
 
-@router.post("/", response_model=DialogCreateRespDTO)  # создание диалога на 2 чел.
+@router.post("/dual", response_model=DialogCreateRespDTO)  # создание диалога на 2 чел.
 async def create_dual_dialog(user: CurrentUser, remote_uid: int, uow: UOW):
     result = await DialogService.create_dual_dialog(uow, user.id, remote_uid)
     if result is None:

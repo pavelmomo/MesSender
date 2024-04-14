@@ -15,7 +15,7 @@ class DatabasePgs:
     @classmethod
     async def init_db(cls):
         DatabasePgs.engine = create_async_engine(url=DatabasePgs.url, echo=False)
-        # await DatabasePgs.create_and_init_tables()
+        #await DatabasePgs.create_and_init_tables()
         DatabasePgs.session_factory = async_sessionmaker(
             DatabasePgs.engine, class_=AsyncSession, expire_on_commit=False
         )

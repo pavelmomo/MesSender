@@ -14,6 +14,7 @@ class MessageCreateDTO(BaseModel):
 
 class MessageDTO(BaseModel):
     id: int
+    dialog_id: int
     user_id: int
     text: str
     status: MessageStatus

@@ -9,12 +9,12 @@ class MessageStatus(enum.Enum):
     viewed = 'viewed'
 
 class Message(Base):
-    __tablename__ = "messages"
+    __tablename__ = "message"
     id: Mapped[int] = mapped_column(primary_key=True)
     text: Mapped[str]
     created_at: Mapped[datetime.datetime] = mapped_column(server_default=text("TIMEZONE('utc',now())"))
     status: Mapped[MessageStatus] = mapped_column(default=MessageStatus.not_viewed)
-    dialog_id: Mapped[int] = mapped_column(ForeignKey("dialogs.id"))
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    dialog_id: Mapped[int] = mapped_column(ForeignKey("dialog.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     dialog: Mapped["Dialog"] = relationship(back_populates="messages")
     user: Mapped["User"] = relationship()

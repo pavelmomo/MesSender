@@ -9,7 +9,7 @@ from src.services import AuthServiceInstance
 app = FastAPI(
     title="Web Application", debug=True
 )  # создание экземпляра приложения Fastapi
-origins = ["http://localhost:3000"]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,

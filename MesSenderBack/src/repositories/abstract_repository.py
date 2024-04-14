@@ -21,12 +21,11 @@ class AbstractDialogRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def check_dialog_user_existing(self, dialog_id: int, user_id: int) -> bool:
+    async def create_dual_dialog(self, user_id: int, remote_user_id: int) -> int:
         raise NotImplementedError
 
-
     @abstractmethod
-    async def create_dual_dialog(self, user_id: int, remote_user_id: int) -> int:
+    async def get_dialog_users(self, dialog_id: int) -> list[int]:
         raise NotImplementedError
 
 
