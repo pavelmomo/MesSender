@@ -1,5 +1,5 @@
 from typing import Optional, Callable, Annotated
-from fastapi import Request, Depends
+from fastapi import Request, Depends, WebSocket
 from fastapi.security import OAuth2PasswordRequestForm
 
 from src.config import SECRET
@@ -91,6 +91,11 @@ class AuthService:
     @staticmethod
     def get_jwt_strategy() -> JWTStrategy:
         return JWTStrategy(secret=SECRET, lifetime_seconds=3600)
+
+    @staticmethod
+    async def authorize_ws_endpoint(websocket: WebSocket):
+        pass
+
 
 
 AuthServiceInstance = AuthService()

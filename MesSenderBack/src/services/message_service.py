@@ -2,6 +2,7 @@ from src.repositories import AbstractUOW
 from src.models import MessageStatus, Message
 from src.schemas import (MessageCreateDTO, CommonStatusDTO,
                          MessageDTO, MessageCheckDTO)
+from . import NotifyService
 
 
 class MessageService:
@@ -14,10 +15,18 @@ class MessageService:
             ids_list = await uow.dialogs.get_dialog_users(message.dialog_id)
             if message.user_id not in ids_list:
                 return None
+
+            joined_ids: list = list()
+            for i in ids_list:
+                if i in NotifyService.sessions:
+                    joined_ids.append(i)
+
+            if (len(joined_ids) > 1) or (len(joined_ids) == 1
+                                         and joined_ids[0] != message.user_id):
+                message_to_send.status = MessageStatus.viewed
+
             message_id = await uow.messages.send_message(message_to_send)
-
-            #отправка в вебсокет сообщения активному пользователю
-
+            NotifyService.add_messages(joined_ids, MessageDTO.model_validate(message_to_send, from_attributes=True))
             return CommonStatusDTO(success=True, id=message_id)
 
 

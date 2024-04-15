@@ -1,11 +1,12 @@
+import asyncio
+import json
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query, WebSocketException
-from starlette import status
-from starlette.websockets import WebSocket
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, WebSocket
+from sse_starlette.sse import EventSourceResponse
 
 from src.schemas import CommonStatusDTO, MessageCheckDTO, MessageCreateDTO, MessageDTO
-from src.services import MessageService
+from src.services import MessageService, NotifyService
 
 from .dependencies import UOW, CurrentUser, Paginator
 
@@ -38,7 +39,7 @@ async def send_message(id: int, message: MessageCreateDTO, uow: UOW, user: Curre
     "/dialogs/{id}/messages", response_model=list[MessageDTO]
 )  # запрос сообщений из диалога
 async def get_messages(
-    id: int, user: CurrentUser, uow: UOW, paginator: Paginator = Depends()
+        id: int, user: CurrentUser, uow: UOW, paginator: Paginator = Depends()
 ):
     result = await MessageService.get_dialog_messages(
         uow, id, user.id, paginator.limit, paginator.offset
@@ -48,17 +49,23 @@ async def get_messages(
     return result
 
 
-async def authorize_ws_endpoint(
-    websocket: WebSocket,
-    token: Annotated[str, Query()] = None,
-):
-    if token is None:
-        raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
-    return token
 
-@router.websocket("/messages/ws")
-async def websocket_endpoint(websocket: WebSocket, user: CurrentUser):
-    await websocket.accept()
-    while True:
-        data = await websocket.receive_text()
-        await websocket.send_text(f"Message text was: {data}")
+@router.get("/messages/notify")
+async def message_notify_endpoint(request: Request, user : CurrentUser):
+    session_id: int = NotifyService.register(user.id)
+    user_id: int = user.id
+    async def event_generator():
+        while True:
+            if await request.is_disconnected():
+                NotifyService.unregister(user_id, session_id)
+                break
+
+            stat, msg_list = NotifyService.get_new_messages(user_id,
+                                                            session_id)
+            if (stat):
+                yield json.dumps([ i.json() for i in msg_list]) + "\n"
+
+            await asyncio.sleep(1)
+    return EventSourceResponse(event_generator(), media_type="application/x-ndjson")
+
+
