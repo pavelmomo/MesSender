@@ -5,6 +5,7 @@ import styles from "../Styles/LoginRegister.module.css";
 import { useEffect, useContext } from "react";
 import { AuthContext } from "../AuthProvider";
 import ModalWindow from "../Blocks/ModalWindow";
+import { url } from "../../App";
 
 export default function Login() {
   const { setModalOpen } = useContext(AuthContext);
@@ -12,7 +13,7 @@ export default function Login() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const response = await fetch("/api/auth/login", {
+    const response = await fetch(`/api/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -22,7 +23,6 @@ export default function Login() {
         password: e.target.password.value,
       }),
     });
-
     switch (response.status) {
       case 204:
         navigate("/");
@@ -35,7 +35,6 @@ export default function Login() {
       default:
     }
   }
-
   return (
     <div className={styles.mainContainer}>
       <form className={styles.mainForm} onSubmit={handleSubmit}>

@@ -5,6 +5,7 @@ import styles from "../Styles/LoginRegister.module.css";
 import { useEffect, useContext } from "react";
 import { AuthContext } from "../AuthProvider";
 import ModalWindow from "../Blocks/ModalWindow";
+import { url } from "../../App";
 
 export default function Register() {
   const { setModalOpen } = useContext(AuthContext);
@@ -12,7 +13,7 @@ export default function Register() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const response = await fetch("/api/auth/register", {
+    const response = await fetch(`/api/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

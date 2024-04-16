@@ -5,6 +5,7 @@ import { IconButton, PushButton } from "../Buttons";
 import { TextFieldBase } from "../TextFields/TextField";
 import { DialogsContext } from "../Tabs/DialogsTab";
 import { AuthContext } from "../AuthProvider";
+import { url } from "../../App";
 
 const EmptyDialog = (
   <div className={styles.emptyContainerStyle}>
@@ -27,46 +28,54 @@ function Message({ text, isAuthored }) {
 }
 
 export default function Dialog() {
-  const [messages, setMessages] = useState([]);
   const messageListContainer = useRef(null);
-  const { currentDialog, setCurrentDialog } = useContext(DialogsContext);
+  const { currentDialog, setCurrentDialog, messages, setMessages, dialogWS } =
+    useContext(DialogsContext);
   const { user } = useContext(AuthContext);
+
   useEffect(() => {
     async function loadMessages() {
       const response = await fetch(`/api/dialogs/${currentDialog.id}/messages`);
       if (response.status !== 200) return;
       const mes = await response.json();
-      console.log(mes);
       setMessages(mes);
     }
     if (currentDialog !== null) {
       loadMessages();
-      messageListContainer.current.scrollTo({
-        left: 0,
-        top: messageListContainer.current.scrollHeight,
-        behavior: "instant",
-      });
     }
   }, [currentDialog]);
 
+  useEffect(() => {
+    if (currentDialog !== null) {
+      if (
+        messageListContainer.current.scrollHeight -
+          messageListContainer.current.clientHeight -
+          messageListContainer.current.scrollTop <
+        100
+      ) {
+        messageListContainer.current.scrollTo({
+          left: 0,
+          top: messageListContainer.current.scrollHeight,
+          behavior: "instant",
+        });
+      }
+    }
+  }, [messages]);
   async function handleSubmit(e) {
     e.preventDefault();
-    const response = await fetch(`/api/dialogs/${currentDialog.id}/messages`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        text: e.target.message.value,
-      }),
-    });
-    if (response.status === 200) {
-      setMessages([
-        ...messages,
-        { user_id: user.id, text: e.target.message.value },
-      ]);
-      e.target.message.value = "";
+    if (dialogWS == null) {
+      return;
     }
+    dialogWS.send(
+      JSON.stringify({
+        event: "send_message",
+        data: {
+          dialog_id: currentDialog.id,
+          text: e.target.message.value,
+        },
+      })
+    );
+    e.target.message.value = "";
   }
 
   return (

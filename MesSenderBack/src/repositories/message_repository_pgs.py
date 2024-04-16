@@ -27,7 +27,7 @@ class MessageRepositoryPgs(AbstractMessageRepository):
                  .limit(limit)
                  .offset(offset))
         messages = await self.session.execute(query)
-        messages = messages.scalars().all()
+        messages = messages.unique().scalars().all()
         for message in messages:
             if message.status == MessageStatus.not_viewed and message.user_id != user_id:
                 message.status = MessageStatus.viewed

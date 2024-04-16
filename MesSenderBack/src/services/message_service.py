@@ -1,7 +1,7 @@
 from src.repositories import AbstractUOW
-from src.models import MessageStatus, Message
+from src.models import Message
 from src.schemas import (MessageCreateDTO, CommonStatusDTO,
-                         MessageDTO, MessageCheckDTO)
+                         MessageDTO, MessageCheckDTO, Package, EventType)
 from . import NotifyService
 
 
@@ -15,18 +15,15 @@ class MessageService:
             ids_list = await uow.dialogs.get_dialog_users(message.dialog_id)
             if message.user_id not in ids_list:
                 return None
-
+            message_id = await uow.messages.send_message(message_to_send)
             joined_ids: list = list()
             for i in ids_list:
-                if i in NotifyService.sessions:
+                if i in NotifyService.connections:
                     joined_ids.append(i)
+            pack_to_send = Package(event = EventType.send_message,
+                                   data = MessageDTO.model_validate(message_to_send, from_attributes=True))
 
-            if (len(joined_ids) > 1) or (len(joined_ids) == 1
-                                         and joined_ids[0] != message.user_id):
-                message_to_send.status = MessageStatus.viewed
-
-            message_id = await uow.messages.send_message(message_to_send)
-            NotifyService.add_messages(joined_ids, MessageDTO.model_validate(message_to_send, from_attributes=True))
+            await NotifyService.send_package(pack_to_send, joined_ids)
             return CommonStatusDTO(success=True, id=message_id)
 
 
@@ -35,6 +32,10 @@ class MessageService:
                                   limit: int, offset: int) -> list[MessageDTO] | None:
         async with uow:
             messages = await uow.messages.get_messages(dialog_id, user_id, limit, offset)
+
+
+
+
             messages_dto = [MessageDTO.model_validate(m, from_attributes=True) for m in messages[::-1]]
             return messages_dto
 

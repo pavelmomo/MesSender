@@ -8,7 +8,7 @@ import { AuthProvider } from "./Components/AuthProvider";
 import Login from "./Components/Pages/Login";
 import Register from "./Components/Pages/Register";
 
-const url = "http://localhost:3000";
+const url = "localhost:8000";
 
 export default function App() {
   return (

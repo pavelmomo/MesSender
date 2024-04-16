@@ -8,6 +8,7 @@ export default function DialogCard({ dialog }) {
   const { setCurrentDialog } = useContext(DialogsContext);
 
   function chooseDialog() {
+    dialog.view_status = "viewed";
     setCurrentDialog(dialog);
   }
 

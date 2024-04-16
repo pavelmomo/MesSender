@@ -1,8 +1,8 @@
+import jwt
 from typing import Optional, Callable, Annotated
-from fastapi import Request, Depends, WebSocket
+from fastapi import Request, Depends, WebSocket, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-
-from src.config import SECRET
+from src.config import SECRET, COOKIE_NAME
 from fastapi_users import BaseUserManager, IntegerIDMixin, FastAPIUsers
 from fastapi_users import exceptions, models, schemas
 from fastapi_users.authentication import (
@@ -54,7 +54,6 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
         )
         if not verified:
             return None
-        # Update password hash to a more robust one if needed
         if updated_password_hash is not None:
             await self.user_db.update(user, {"hashed_password": updated_password_hash})
         return user
@@ -77,7 +76,7 @@ class AuthService:
     def init_auth_service(self):
         self.auth_backend = AuthenticationBackend(
             name="jwt",
-            transport=CookieTransport(cookie_name="credits", cookie_max_age=3600),
+            transport=CookieTransport(cookie_name=COOKIE_NAME, cookie_max_age=3600, cookie_secure=False),
             get_strategy=self.get_jwt_strategy,
         )
         self.fastapi_users = FastAPIUsers[User, int](self.get_user_manager, [self.auth_backend])
@@ -93,8 +92,22 @@ class AuthService:
         return JWTStrategy(secret=SECRET, lifetime_seconds=3600)
 
     @staticmethod
-    async def authorize_ws_endpoint(websocket: WebSocket):
-        pass
+    async def authorize_ws_endpoint(websocket: WebSocket,
+                                    uow: Annotated[AbstractUOW, Depends(UnitOfWorkPgs)]) -> int | None:
+        if COOKIE_NAME not in websocket.cookies:
+            return None
+        try:
+            data = jwt.decode(websocket.cookies[COOKIE_NAME], SECRET, algorithms=["HS256"],
+                                audience=["fastapi-users:auth"])
+            user_id = int(data.get("sub"))
+        except (jwt.PyJWTError, ValueError, TypeError):
+            return None
+        async with (uow):
+            user = await uow.users.get(user_id)
+            return user_id if user != None \
+                else None
+
+
 
 
 

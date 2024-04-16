@@ -9,11 +9,11 @@ import { ButtonWithIcon } from "../Buttons";
 import { AuthContext } from "../AuthProvider";
 
 const userMenuList = [
-  [<SmsTwoToneIcon />, "Диалоги", ""],
-  [<HailTwoToneIcon />, "Люди", "users"],
-  [<AccountCircleTwoToneIcon />, "Профиль", "profile"],
+  [<SmsTwoToneIcon />, "Диалоги", "", 1],
+  [<HailTwoToneIcon />, "Люди", "users", 2],
+  [<AccountCircleTwoToneIcon />, "Профиль", "profile", 3],
 ];
-const moderatorMenuList = [[<HailTwoToneIcon />, "Жалобы"]];
+const moderatorMenuList = [[<HailTwoToneIcon />, "Жалобы", "hhh", 4]];
 const menuVariants = { user: userMenuList, moderator: moderatorMenuList };
 
 export default function Menu() {
@@ -33,6 +33,7 @@ export default function Menu() {
       </div>
       {menuVariants[user.role].map((item) => (
         <ButtonWithIcon
+          key={item[3]}
           icon={item[0]}
           text={item[1]}
           linkPath={item[2]}

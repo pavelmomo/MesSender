@@ -18,6 +18,7 @@ const emptyList = (
 
 export default function DialogsList() {
   const { dialogs } = useContext(DialogsContext);
+
   return (
     <>
       {dialogs.length !== 0 ? (

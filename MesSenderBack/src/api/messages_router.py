@@ -1,12 +1,10 @@
-import asyncio
-import json
-from typing import Annotated
-
+import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, WebSocket
-from sse_starlette.sse import EventSourceResponse
 
-from src.schemas import CommonStatusDTO, MessageCheckDTO, MessageCreateDTO, MessageDTO
-from src.services import MessageService, NotifyService
+from starlette.websockets import WebSocketDisconnect
+
+from src.schemas import CommonStatusDTO, MessageCheckDTO, MessageCreateDTO, MessageDTO, Package, EventType
+from src.services import MessageService, NotifyService, AuthServiceInstance
 
 from .dependencies import UOW, CurrentUser, Paginator
 
@@ -49,23 +47,31 @@ async def get_messages(
     return result
 
 
-
-@router.get("/messages/notify")
-async def message_notify_endpoint(request: Request, user : CurrentUser):
-    session_id: int = NotifyService.register(user.id)
-    user_id: int = user.id
-    async def event_generator():
+@router.websocket("/messages/ws")
+async def websocket_endpoint(websocket: WebSocket,
+                             uow: UOW,
+                             user_id: int = Depends(AuthServiceInstance.authorize_ws_endpoint)):
+    if user_id == None:
+        await websocket.close(code=401)
+        return
+    await NotifyService.register(websocket, user_id)
+    try:
         while True:
-            if await request.is_disconnected():
-                NotifyService.unregister(user_id, session_id)
-                break
-
-            stat, msg_list = NotifyService.get_new_messages(user_id,
-                                                            session_id)
-            if (stat):
-                yield json.dumps([ i.json() for i in msg_list]) + "\n"
-
-            await asyncio.sleep(1)
-    return EventSourceResponse(event_generator(), media_type="application/x-ndjson")
+            data = await websocket.receive_json()
+            res = await NotifyService.handle_user_package(Package.model_validate(data),uow,user_id)
+            if res == False:
+                NotifyService.unregister(websocket, user_id)
+                await websocket.close(code=403)
+    except WebSocketDisconnect:
+        NotifyService.unregister(websocket, user_id)
 
 
+@router.get("/messages/ws/test")
+async def test_ws():
+    p = Package(event=EventType.send_message, data = MessageDTO(id = 10,
+                                                        dialog_id = 10,
+                                                        user_id = 8,
+                                                        status = 'viewed',
+                                                        created_at = datetime.datetime.utcnow(),
+                                                        text = "hellow"))
+    await NotifyService.send_package(p,[2])

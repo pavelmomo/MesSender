@@ -4,7 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from . import Base
 
 
-class MessageStatus(enum.Enum):
+class MessageStatus(str,enum.Enum):
     not_viewed = 'not_viewed',
     viewed = 'viewed'
 

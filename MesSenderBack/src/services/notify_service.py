@@ -1,47 +1,40 @@
-from src.schemas import MessageDTO
-
-
+from src.repositories import AbstractUOW
+from src.schemas import Package
+from fastapi import WebSocket
 
 
 
 
 class NotifyService:
-    sessions : dict[int, dict[int, list [MessageDTO]]] = dict()
+    connections: dict[int, list[WebSocket]] = dict()
+
     @staticmethod
-    def register(user_id: int) -> int:
-        session_id : int
-        if (user_id not in NotifyService.sessions):
-            session_id = 0
-            NotifyService.sessions[user_id] = { session_id : list()}
+    async def register(websocket: WebSocket, user_id: int):
+        await websocket.accept()
+        if user_id not in NotifyService.connections:
+            NotifyService.connections[user_id] = [websocket]
         else:
-            session_id = NotifyService._find_new_session_id(NotifyService.sessions[user_id])
-            NotifyService.sessions[user_id][session_id] = list()
-        return session_id
+            NotifyService.connections[user_id].append(websocket)
 
     @staticmethod
-    def unregister(user_id: int, session_id: int):
-        del NotifyService.sessions[user_id][session_id]
-        if (len(NotifyService.sessions[user_id]) == 0):
-            del NotifyService.sessions[user_id]
+    def unregister(websocket: WebSocket, user_id: int):
+        if (user_id not in NotifyService.connections
+                or websocket not in NotifyService.connections[user_id]):
+            return
+        NotifyService.connections[user_id].remove(websocket)
+        if len(NotifyService.connections[user_id]) == 0:
+            del NotifyService.connections[user_id]
 
     @staticmethod
-    def add_messages(user_ids: list[int], message: MessageDTO):
+    async def send_package(package: Package, user_ids: list[int]):
         for id in user_ids:
-            for session in NotifyService.sessions[id]:
-                NotifyService.sessions[id][session].append(message)
-
-
+            for i in NotifyService.connections[id]:
+                await i.send_json(package.json())
     @staticmethod
-    def get_new_messages(user_id: int, session_id: int) -> (bool, list | None):
-        if (len(NotifyService.sessions[user_id][session_id]) > 0):
-            buf = NotifyService.sessions[user_id][session_id].copy()
-            NotifyService.sessions[user_id][session_id].clear()
-            return True, buf
-        else:
-            return False, None
-
-    @staticmethod
-    def _find_new_session_id(user_dict : dict[int, list[MessageDTO]]) -> int:
-        for i in range(100):
-            if i not in user_dict:
-                return i
+    async def handle_user_package(package: Package, uow : AbstractUOW, user_id: int) -> bool:
+        from src.services import MessageService
+        if package.event == 'send_message':
+            package.data.user_id = user_id
+            result = await MessageService.send_message(uow, package.data)
+            if result is None:
+                return False

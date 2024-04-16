@@ -9,5 +9,5 @@ DB_PORT = environ.get("DB_PORT")
 DB_NAME = environ.get("DB_NAME")
 DB_USER = environ.get("DB_USER")
 DB_PASS = environ.get("DB_PASS")
-
+COOKIE_NAME = environ.get("COOKIE_NAME")
 SECRET = environ.get("SECRET")
