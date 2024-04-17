@@ -3,7 +3,7 @@ import DialogsList from "../Blocks/DialogsList";
 import Dialog from "../Blocks/Dialog";
 import styles from "./DialogsTab.module.css";
 import { AuthContext } from "../AuthProvider";
-import { url } from "../../App";
+import { wsUri } from "../../Utils";
 export const DialogsContext = createContext(null);
 
 export default function DialogsTab() {
@@ -63,7 +63,7 @@ export default function DialogsTab() {
 
   useEffect(() => {
     loadDialogs();
-    const ws = new WebSocket(`ws://localhost:8000/api/messages/ws`);
+    const ws = new WebSocket(`${wsUri}/api/messages/ws`);
     setDialogWS(ws);
     return () => ws.close();
   }, []);

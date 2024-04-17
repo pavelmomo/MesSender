@@ -99,9 +99,20 @@ export default function Dialog() {
             className={styles.messageListContainerStyle}
             ref={messageListContainer}
           >
-            <ul className={styles.messageList}>
+            <ul className={styles.messageList} style={{ width: "100%" }}>
               {messages.map((message) => (
-                <li key={message.id}>
+                <li
+                  key={message.id}
+                  style={{
+                    borderRadius: "5px",
+                    width: "100%",
+                    margin: "5px",
+                    backgroundColor:
+                      message.status === "viewed"
+                        ? "var(--background-color)"
+                        : "var(--main-light-color)",
+                  }}
+                >
                   <Message
                     isAuthored={message.user_id === user.id ? true : false}
                     text={message.text}

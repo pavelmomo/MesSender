@@ -9,7 +9,7 @@
 .mainLogo {
   font-weight: 600;
   margin: 2px;
-  color: var(--secondary-color);
+  color: var(--contrast-color);
   font-size: 23px;
   font-weight: 600;
 }

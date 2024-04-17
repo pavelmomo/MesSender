@@ -1,8 +1,8 @@
 :root {
-  --main-color: rgb(176, 190, 197);
+  --main-color: rgb(165, 197, 212);
   --main-light-color: rgba(196, 201, 204, 0.898);
   --secondary-color: rgb(236, 239, 241);
-  --contrast-color: rgb(69, 90, 100);
+  --contrast-color: rgb(38, 66, 79);
   --shadow-color: rgba(129, 153, 165, 0.839);
   --background-color: white;
 }
