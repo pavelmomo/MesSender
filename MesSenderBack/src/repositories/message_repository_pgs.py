@@ -18,7 +18,7 @@ class MessageRepositoryPgs(AbstractMessageRepository):
         return message.id
 
     async def get_messages(self, dialog_id: int, user_id: int,
-                           limit: int, offset: int) -> Sequence[Message]:
+                           limit: int, offset: int) -> (Sequence[Message], Sequence[int]):
         query = (select(Message)
                  .join(Dialog, Message.dialog_id == dialog_id)
                  .join(DialogUser, and_(DialogUser.user_id == user_id, DialogUser.dialog_id == Dialog.id))
@@ -28,20 +28,16 @@ class MessageRepositoryPgs(AbstractMessageRepository):
                  .offset(offset))
         messages = await self.session.execute(query)
         messages = messages.unique().scalars().all()
+        changed_status_msg_ids: list[int] = list()
         for message in messages:
             if message.status == MessageStatus.not_viewed and message.user_id != user_id:
+                changed_status_msg_ids.append(message.id)
                 message.status = MessageStatus.viewed
         await self.session.commit()
-        return messages
+        return messages, changed_status_msg_ids
 
-    async def get_last_message_datetime(self, user_id: int) -> datetime.datetime | None:
-        query = \
-        """select m.created_at  from messages m 
-            inner join dialogs d on m.dialog_id = d.id
-            inner join dialogs_users du on d.id = du.dialog_id
-                where du.user_id = :uid
-                order by m.created_at desc 
-                limit 1
-        """
-        dateTime = await self.session.scalar(text(query), { 'uid': user_id })
-        return dateTime
+    async def set_viewed_status(self, ids: list[int], dialog_id: int):
+        query = (update(Message)
+                 .where( and_(Message.id.in_(ids), Message.dialog_id == dialog_id))
+                 .values(status='viewed'))
+        await self.session.execute(query)

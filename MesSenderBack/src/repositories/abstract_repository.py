@@ -58,8 +58,9 @@ class AbstractMessageRepository(ABC):
     async def get_messages(self, dialog_id: int, user_id: int,
                            limit: int, offset: int) -> Sequence[Message]:
         raise NotImplementedError
+
     @abstractmethod
-    async def get_last_message_datetime(self, user_id: int) -> datetime.datetime | None:
+    async def set_viewed_status(self, ids: list[int], dialog_id: int) -> bool:
         raise NotImplementedError
 
 class AbstractUOW(ABC):

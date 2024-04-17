@@ -18,7 +18,8 @@ class DialogService:
                                if d.dialog.messages[0].user_id == user_id
                                   or d.dialog.messages[0].status == MessageStatus.viewed
                                else DialogViewStatus.not_viewed,
-                               'last_message': '' if len(d.dialog.messages) == 0 else d.dialog.messages[0].text
+                               'last_message': '' if len(d.dialog.messages) == 0 else d.dialog.messages[0].text,
+                               'remote_uid': None if d.remote_user == None else d.remote_user.id
                                }
                 dialogs_dto.append(DialogDTO.model_validate(dialog_dict))
 

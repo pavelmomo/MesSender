@@ -11,25 +11,18 @@ class DialogRepositoryPgs(AbstractDialogRepository):
         self.session = session
 
     async def get_active_user_dialogs(self, user_id: int, limit: int, offset: int) -> Sequence[DialogUser]:
-        subqueryM = (select(Message.id)
+        subquery = (select(Message.id)
                      .filter(and_(Message.dialog_id == Dialog.id, Message.created_at > DialogUser.border_date))
                      .order_by(Message.created_at.desc())
                      .limit(1)
                      .scalar_subquery()
                      .correlate(Dialog, DialogUser)
                      )
-        subqueryD = (select(DialogUser.user_id)
-                     .filter(
-            and_(DialogUser.dialog_id == Dialog.id, DialogUser.user_id != user_id, Dialog.is_multiply == False))
-                     .limit(1)
-                     .scalar_subquery()
-                     .correlate(Dialog)
-                     )
         query = (select(DialogUser)
                  .join(DialogUser.dialog)
                  .filter(DialogUser.user_id == user_id)
-                 .join(Message, Message.id == subqueryM)  # замена с outerjoin, вывод только диалогов с посл. сообщением
-                 .outerjoin(User, User.id == subqueryD)
+                 .join(Message, Message.id == subquery)  # замена с outerjoin, вывод только диалогов с посл. сообщением
+                 .outerjoin(User, User.id == DialogUser.remote_user_id)
                  .options(contains_eager(DialogUser.remote_user))
                  .options(contains_eager(DialogUser.dialog,
                                          Dialog.messages))
@@ -42,14 +35,11 @@ class DialogRepositoryPgs(AbstractDialogRepository):
         return result.unique().scalars().all()
 
     async def get_dual_dialog_id(self, uid: int, remote_uid: int) -> int:
-        subquery = (select(DialogUser.dialog_id)
-                    .filter(DialogUser.user_id == remote_uid)
-                    )
+
         query = (select(DialogUser)
-                 .join(DialogUser.dialog)
                  .filter(and_(DialogUser.user_id == uid,
-                              Dialog.is_multiply == False,
-                              DialogUser.dialog_id.in_(subquery)))
+                              DialogUser.remote_user_id == remote_uid,
+                              Dialog.is_multiply == False))
                  .limit(1)
                  )
         result = await self.session.execute(query)
@@ -62,9 +52,11 @@ class DialogRepositoryPgs(AbstractDialogRepository):
         self.session.add(new_dialog)
         await self.session.flush()
         new_dialog_users = [DialogUser(dialog_id=new_dialog.id,
-                                       user_id=user_id),
+                                       user_id=user_id,
+                                       remote_user_id=remote_user_id),
                             DialogUser(dialog_id=new_dialog.id,
-                                       user_id=remote_user_id)
+                                       user_id=remote_user_id,
+                                       remote_user_id=user_id)
                             ]
         self.session.add_all(new_dialog_users)
         await self.session.commit()

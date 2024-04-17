@@ -11,16 +11,6 @@ from .dependencies import UOW, CurrentUser, Paginator
 router = APIRouter(prefix="/api", tags=["Messages"])  # создание роутера
 
 
-@router.get(
-    "/messages/check", response_model=MessageCheckDTO
-)  # получение списка диалогов пользователя
-async def get_last_message_datetime(current_user: CurrentUser, uow: UOW):
-    result = await MessageService.get_last_message_datetime(uow, current_user.id)
-    if result is None:
-        raise HTTPException(status_code=403, detail="Incorrect parameters")
-    return result
-
-
 @router.post(
     "/dialogs/{id}/messages", response_model=CommonStatusDTO
 )  # отправка сообщения в диалог
@@ -66,12 +56,3 @@ async def websocket_endpoint(websocket: WebSocket,
         NotifyService.unregister(websocket, user_id)
 
 
-@router.get("/messages/ws/test")
-async def test_ws():
-    p = Package(event=EventType.send_message, data = MessageDTO(id = 10,
-                                                        dialog_id = 10,
-                                                        user_id = 8,
-                                                        status = 'viewed',
-                                                        created_at = datetime.datetime.utcnow(),
-                                                        text = "hellow"))
-    await NotifyService.send_package(p,[2])

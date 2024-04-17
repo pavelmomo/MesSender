@@ -17,6 +17,7 @@ class DialogDTO(BaseModel):
     dialog_name: str
     view_status: DialogViewStatus
     last_message: str
+    remote_uid: Optional[int] = None
 
 
 class DialogCreateRespDTO(BaseModel):

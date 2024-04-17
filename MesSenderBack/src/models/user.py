@@ -19,8 +19,6 @@ class User(Base, SQLAlchemyBaseUserTable[int]):
     email: Mapped[str] = mapped_column(
         String(length=30), unique=True, index=True, nullable=False
     )
-    dialogs: Mapped[list[DialogUser]] = relationship(
-        "DialogUser", back_populates="user"
-    )
+
 
 

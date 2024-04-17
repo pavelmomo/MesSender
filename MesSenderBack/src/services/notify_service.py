@@ -27,9 +27,16 @@ class NotifyService:
 
     @staticmethod
     async def send_package(package: Package, user_ids: list[int]):
-        for id in user_ids:
+        if len(user_ids) == 0:
+            return
+        joined_ids: list = list()
+        for i in user_ids:
+            if i in NotifyService.connections:
+                joined_ids.append(i)
+        for id in joined_ids:
             for i in NotifyService.connections[id]:
                 await i.send_json(package.json())
+
     @staticmethod
     async def handle_user_package(package: Package, uow : AbstractUOW, user_id: int) -> bool:
         from src.services import MessageService
@@ -38,3 +45,7 @@ class NotifyService:
             result = await MessageService.send_message(uow, package.data)
             if result is None:
                 return False
+        elif package.event == 'set_message_viewed':
+            result = await MessageService.set_message_viewed(uow, package.data.message_ids,
+                                                             package.data.dialog_id, user_id)
+            return result

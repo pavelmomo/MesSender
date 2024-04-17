@@ -42,23 +42,21 @@ export default function Dialog() {
     }
     if (currentDialog !== null) {
       loadMessages();
+      messageListContainer.current.scrollTo({
+        left: 0,
+        top: messageListContainer.current.scrollHeight,
+        behavior: "instant",
+      });
     }
   }, [currentDialog]);
 
   useEffect(() => {
     if (currentDialog !== null) {
-      if (
-        messageListContainer.current.scrollHeight -
-          messageListContainer.current.clientHeight -
-          messageListContainer.current.scrollTop <
-        100
-      ) {
-        messageListContainer.current.scrollTo({
-          left: 0,
-          top: messageListContainer.current.scrollHeight,
-          behavior: "instant",
-        });
-      }
+      messageListContainer.current.scrollTo({
+        left: 0,
+        top: messageListContainer.current.scrollHeight,
+        behavior: "instant",
+      });
     }
   }, [messages]);
   async function handleSubmit(e) {

@@ -18,15 +18,19 @@ class DialogUser(Base):
         ForeignKey("user.id"),
         primary_key=True
     )
+    remote_user_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("user.id")
+    )
     user: Mapped["User"] = relationship(
-        "User", back_populates="dialogs"
+        "User", foreign_keys=[user_id]
+    )
+    remote_user: Mapped["User"] = relationship(
+        "User", foreign_keys=[remote_user_id]
     )
     dialog: Mapped["Dialog"] = relationship(
         "Dialog", back_populates="users"
     )
-    remote_user: Mapped["User"] = relationship(
-        "User", viewonly=True
-    )
+
 
 
 class Dialog(Base):

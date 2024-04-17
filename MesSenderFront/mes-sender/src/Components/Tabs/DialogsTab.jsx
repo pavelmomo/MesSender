@@ -12,21 +12,37 @@ export default function DialogsTab() {
   const [dialogs, setDialogs] = useState([]);
   const [currentDialog, setCurrentDialog] = useState(null);
   const [dialogWS, setDialogWS] = useState(null);
+
   function handleNewMessage(e) {
     const recvPacket = JSON.parse(JSON.parse(e.data));
+
     if (recvPacket.event === "send_message") {
       const dialogIndex = dialogs.findIndex(
         (item) => item.id === recvPacket.data.dialog_id
       );
+
       if (dialogIndex !== -1) {
         const bufDialog = dialogs[dialogIndex];
         bufDialog.last_message = recvPacket.data.text;
+
         if (
           currentDialog !== null &&
           currentDialog.id === recvPacket.data.dialog_id
         ) {
           //открыт диалог с пользователем, приславшим сообщение
           setMessages([...messages, recvPacket.data]);
+          if (recvPacket.data.user_id !== user.id) {
+            dialogWS.send(
+              JSON.stringify({
+                event: "set_message_viewed",
+                data: {
+                  message_ids: [recvPacket.data.id],
+                  dialog_id: recvPacket.data.dialog_id,
+                },
+              })
+            );
+          }
+
           //высылаем для сообщения статус - прочтено
         } else {
           //диалог с пользователем не открыт
@@ -49,9 +65,18 @@ export default function DialogsTab() {
       ) {
         return;
       }
+      const bufMessages = messages.map((element) => {
+        if (
+          recvPacket.data.message_ids.findIndex((e) => e === element.id) !== -1
+        ) {
+          element.status = "viewed";
+        }
+        return element;
+      });
+      setMessages(bufMessages);
     }
   }
-
+  console.log("rendeer");
   async function loadDialogs() {
     const dialogs = await fetch(`/api/dialogs/`).then(
       (response) => response.json(),
