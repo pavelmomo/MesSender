@@ -36,7 +36,7 @@ app.include_router(
     prefix="/api/auth",
     tags=["Auth"],
 )
-app.mount("/", StaticFiles(directory="public"))
+app.mount("/", StaticFiles(directory="public", html=True))
 
 
 @app.on_event("startup")
@@ -44,6 +44,6 @@ async def database_init():
     await DatabasePgs.init_db()
 
 
-@app.get("/")
-async def index():
-    return RedirectResponse("/docs")
+# @app.get("/")
+# async def index():
+#     return RedirectResponse("/docs")

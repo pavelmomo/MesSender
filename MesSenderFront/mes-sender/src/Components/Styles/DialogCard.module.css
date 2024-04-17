@@ -2,11 +2,12 @@
   width: 100%;
   text-align: left;
   height: 80px;
+  margin-bottom: 10px;
   display: flex;
   border: 2px solid;
   border-color: var(--main-color);
   background-color: var(--background-color);
-  border-radius: 1;
+  border-radius: 5px;
   box-shadow: 1px 1px 3px 0px var(--shadow-color);
   cursor: pointer;
 }

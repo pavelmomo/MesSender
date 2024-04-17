@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 export const AuthContext = createContext(null);
 
@@ -6,7 +6,8 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [isModalOpen, setModalOpen] = useState(false);
-  async function getCurrentUser() {
+
+  const getCurrentUser = useCallback(async () => {
     const response = await fetch(`/api/users/current`);
     switch (response.status) {
       case 401:
@@ -18,8 +19,9 @@ export const AuthProvider = ({ children }) => {
       default:
         break;
     }
-  }
-  async function logout() {
+  }, [navigate]);
+
+  const logout = useCallback(async () => {
     const response = await fetch(`/api/auth/logout`, {
       method: "POST",
     });
@@ -31,7 +33,8 @@ export const AuthProvider = ({ children }) => {
       default:
         break;
     }
-  }
+  }, [navigate]);
+
   const contextValue = {
     user,
     setUser,

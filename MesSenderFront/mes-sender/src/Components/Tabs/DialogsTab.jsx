@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import DialogsList from "../Blocks/DialogsList";
 import Dialog from "../Blocks/Dialog";
-import styles from "./DialogsTab.module.css";
+import styles from "../Styles/DialogsTab.module.css";
 import { AuthContext } from "../AuthProvider";
 import { wsUri } from "../../Utils";
 export const DialogsContext = createContext(null);
@@ -32,11 +32,13 @@ export default function DialogsTab() {
       const recvPacket = JSON.parse(JSON.parse(e.data));
 
       if (recvPacket.event === "send_message") {
+        //получено новое сообщение
         const dialogIndex = dialogs.findIndex(
           (item) => item.id === recvPacket.data.dialog_id
         );
 
         if (dialogIndex !== -1) {
+          //проверка на существование диалога
           const bufDialog = dialogs[dialogIndex];
           bufDialog.last_message = recvPacket.data.text;
 
@@ -45,7 +47,8 @@ export default function DialogsTab() {
             currentDialog.id === recvPacket.data.dialog_id
           ) {
             //открыт диалог с пользователем, приславшим сообщение
-            setMessages([...messages, recvPacket.data]);
+            setMessages((prev) => [...prev, recvPacket.data]);
+            //высылаем для сообщения статус - прочтено
             if (recvPacket.data.user_id !== user.id) {
               dialogWS.send(
                 JSON.stringify({
@@ -57,8 +60,6 @@ export default function DialogsTab() {
                 })
               );
             }
-
-            //высылаем для сообщения статус - прочтено
           } else {
             //диалог с пользователем не открыт
             if (recvPacket.data.user_id !== user.id) {
@@ -70,6 +71,7 @@ export default function DialogsTab() {
           bufDialogs.unshift(bufDialog);
           setDialogs(bufDialogs);
         } else {
+          //загрузка всех диалогов, поскольку сообщение из нового диалога
           loadDialogs();
         }
       } else if (recvPacket.event === "set_message_viewed") {
@@ -81,13 +83,14 @@ export default function DialogsTab() {
           return;
         }
         const bufMessages = messages.map((element) => {
+          const bufElem = element;
           if (
             recvPacket.data.message_ids.findIndex((e) => e === element.id) !==
             -1
           ) {
-            element.status = "viewed";
+            bufElem.status = "viewed";
           }
-          return element;
+          return bufElem;
         });
         setMessages(bufMessages);
       }

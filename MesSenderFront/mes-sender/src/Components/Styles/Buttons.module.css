@@ -21,6 +21,8 @@
   align-items: center;
   background-color: var(--secondary-color);
   color: var(--contrast-color);
+  border-radius: 5px;
+  margin: 5px;
 }
 
 .buttonIcon {

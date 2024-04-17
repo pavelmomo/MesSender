@@ -2,7 +2,6 @@
   display: flex;
   flex: 10;
   justify-content: space-evenly;
-  flex-wrap: nowrap;
   height: 100vh;
   min-height: 500px;
 }

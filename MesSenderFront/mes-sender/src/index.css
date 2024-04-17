@@ -28,7 +28,8 @@ h5 {
   color: var(--contrast-color);
 }
 h4 {
-  font-size: 22px;
+  font-size: 23px;
+  font-weight: 400;
   color: var(--contrast-color);
 }
 h3 {

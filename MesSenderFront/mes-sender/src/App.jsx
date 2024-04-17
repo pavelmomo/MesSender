@@ -7,6 +7,7 @@ import UsersTab from "./Components/Tabs/UsersTab";
 import { AuthProvider } from "./Components/AuthProvider";
 import Login from "./Components/Pages/Login";
 import Register from "./Components/Pages/Register";
+import ProfileTab from "./Components/Tabs/ProfileTab";
 
 const url = "localhost:8000";
 
@@ -19,7 +20,7 @@ export default function App() {
             <Route index element={<Navigate to="dialogs" />} />
             <Route path="dialogs" element={<DialogsTab />} />
             <Route path="users" element={<UsersTab />} />
-            <Route path="profile" element={<UsersTab />} />
+            <Route path="profile" element={<ProfileTab />} />
           </Route>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

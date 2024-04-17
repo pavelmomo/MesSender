@@ -37,7 +37,7 @@ export default function Menu() {
           icon={item[0]}
           text={item[1]}
           linkPath={item[2]}
-          style={{ flex: 1, margin: 1 }}
+          style={{ flex: 1 }}
         />
       ))}
       <div style={{ display: "flex", flex: 12 }}></div>
@@ -45,7 +45,7 @@ export default function Menu() {
         onClick={logout}
         icon={<ExitToAppIcon />}
         text={"Выход"}
-        style={{ flex: 1, margin: 1 }}
+        style={{ flex: 1 }}
       />
     </div>
   );

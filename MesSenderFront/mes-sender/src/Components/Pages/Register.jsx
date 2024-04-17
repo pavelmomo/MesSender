@@ -2,7 +2,7 @@ import { TextFieldBase } from "../TextFields/TextField";
 import { PushButton } from "../Buttons";
 import { Link, useNavigate } from "react-router-dom";
 import styles from "../Styles/LoginRegister.module.css";
-import { useEffect, useContext } from "react";
+import { useCallback, useContext } from "react";
 import { AuthContext } from "../AuthProvider";
 import ModalWindow from "../Blocks/ModalWindow";
 import { url } from "../../App";
@@ -11,30 +11,33 @@ export default function Register() {
   const { setModalOpen } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    const response = await fetch(`/api/auth/register`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: e.target.email.value,
-        username: e.target.username.value,
-        password: e.target.password.value,
-      }),
-    });
-    switch (response.status) {
-      case 201:
-        navigate("/login");
-        break;
-      case 400:
-      case 422:
-        setModalOpen(true);
-        break;
-      default:
-    }
-  }
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+      const response = await fetch(`/api/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: e.target.email.value,
+          username: e.target.username.value,
+          password: e.target.password.value,
+        }),
+      });
+      switch (response.status) {
+        case 201:
+          navigate("/login");
+          break;
+        case 400:
+        case 422:
+          setModalOpen(true);
+          break;
+        default:
+      }
+    },
+    [navigate, setModalOpen]
+  );
 
   return (
     <div className={styles.mainContainer}>

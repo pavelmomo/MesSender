@@ -62,7 +62,7 @@ export default function Dialog() {
   const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault();
-      if (dialogWS == null || e.target.message.value === "") {
+      if (dialogWS == null || e.target.message.value.trim().length === 0) {
         return;
       }
       dialogWS.send(

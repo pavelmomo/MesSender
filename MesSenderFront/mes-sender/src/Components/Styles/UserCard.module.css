@@ -1,0 +1,21 @@
+.mainContainer {
+  height: 60px;
+  width: 100%;
+  display: flex;
+  border-radius: 3px;
+  border: 2px solid;
+  border-color: var(--main-color);
+  box-shadow: 1px 1px 3px 0px var(--shadow-color);
+  margin-bottom: 10px;
+}
+
+.iconContainer {
+  align-self: center;
+  text-align: center;
+  margin: 30px;
+}
+.usernameContainer {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}

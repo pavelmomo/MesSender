@@ -5,12 +5,13 @@
   min-width: 250px;
   flex: 2;
   box-shadow: 1px 1px 3px 1px var(--shadow-color);
+  border-radius: 5px;
   background-color: var(--main-color);
 }
 .mainLogo {
   font-weight: 600;
   margin: 2px;
-  color: var(--contrast-color);
-  font-size: 23px;
-  font-weight: 600;
+  color: var(--secondary-color);
+  font-size: 24px;
+  font-weight: 700;
 }
