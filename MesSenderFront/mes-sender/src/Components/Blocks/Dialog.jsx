@@ -1,11 +1,10 @@
-import React, { useState, useContext, useRef, useEffect } from "react";
+import React, { useCallback, useContext, useRef, useEffect } from "react";
 import styles from "../Styles/Dialog.module.css";
 import { ArrowBackIosNewSharp, Person2Rounded } from "@mui/icons-material";
 import { IconButton, PushButton } from "../Buttons";
 import { TextFieldBase } from "../TextFields/TextField";
 import { DialogsContext } from "../Tabs/DialogsTab";
 import { AuthContext } from "../AuthProvider";
-import { url } from "../../App";
 
 const EmptyDialog = (
   <div className={styles.emptyContainerStyle}>
@@ -48,7 +47,7 @@ export default function Dialog() {
         behavior: "instant",
       });
     }
-  }, [currentDialog]);
+  }, [currentDialog, setMessages]);
 
   useEffect(() => {
     if (currentDialog !== null) {
@@ -59,22 +58,26 @@ export default function Dialog() {
       });
     }
   }, [messages]);
-  async function handleSubmit(e) {
-    e.preventDefault();
-    if (dialogWS == null) {
-      return;
-    }
-    dialogWS.send(
-      JSON.stringify({
-        event: "send_message",
-        data: {
-          dialog_id: currentDialog.id,
-          text: e.target.message.value,
-        },
-      })
-    );
-    e.target.message.value = "";
-  }
+
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+      if (dialogWS == null || e.target.message.value === "") {
+        return;
+      }
+      dialogWS.send(
+        JSON.stringify({
+          event: "send_message",
+          data: {
+            dialog_id: currentDialog.id,
+            text: e.target.message.value,
+          },
+        })
+      );
+      e.target.message.value = "";
+    },
+    [dialogWS, currentDialog]
+  );
 
   return (
     <>
