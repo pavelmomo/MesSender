@@ -1,21 +1,19 @@
-import enum
-from typing import Optional
-from pydantic import EmailStr, Field
-from src.models import Role
+from pydantic import BaseModel, Field
 
 from fastapi_users import schemas
 from src.models import Role
 
 
-class UserRead(schemas.BaseUser[int]):
+class UserReadDTO(schemas.BaseUser[int]):
     username: str = Field(max_length=20)
     role: Role
 
 
-
-class UserCreate(schemas.BaseUserCreate):
+class UserCreateDTO(schemas.BaseUserCreate):
     username: str = Field(max_length=20)
 
-
+class UserReadShortDTO(BaseModel):
+    id: int
+    username: str = Field(max_length=20)
 
 

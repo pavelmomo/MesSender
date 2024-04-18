@@ -1,7 +1,7 @@
 from src.repositories import AbstractUOW
 from src.models import Message
 from src.schemas import (MessageCreateDTO, CommonStatusDTO,
-                         MessageDTO, Package, EventType, SetMessageViewed)
+                         MessageDTO, PackageDTO, EventType, SetMessageViewed)
 from . import NotifyService
 
 
@@ -17,8 +17,8 @@ class MessageService:
                 return None
             message_id = await uow.messages.send_message(message_to_send)
 
-            pack_to_send = Package(event = EventType.send_message,
-                                   data = MessageDTO.model_validate(message_to_send, from_attributes=True))
+            pack_to_send = PackageDTO(event = EventType.send_message,
+                                      data = MessageDTO.model_validate(message_to_send, from_attributes=True))
 
             await NotifyService.send_package(pack_to_send, user_ids_list)
             return CommonStatusDTO(success=True, id=message_id)
@@ -36,8 +36,8 @@ class MessageService:
             messages, changed_status_msg_ids = await uow.messages.get_messages(dialog_id, user_id, limit, offset)
             if (len(changed_status_msg_ids) > 0):
                 user_ids_list.remove(user_id)
-                pack_to_send = Package(event=EventType.set_message_viewed,
-                                       data= SetMessageViewed(dialog_id=dialog_id,
+                pack_to_send = PackageDTO(event=EventType.set_message_viewed,
+                                          data= SetMessageViewed(dialog_id=dialog_id,
                                                               message_ids=changed_status_msg_ids))
                 await NotifyService.send_package(pack_to_send, user_ids_list)
             messages_dto = [MessageDTO.model_validate(m, from_attributes=True) for m in messages[::-1]]
@@ -50,8 +50,8 @@ class MessageService:
             if user_id not in user_ids_list:
                 return False
             await uow.messages.set_viewed_status(ids, dialog_id)
-            pack_to_send = Package(event=EventType.set_message_viewed,
-                                   data=SetMessageViewed(dialog_id=dialog_id,
+            pack_to_send = PackageDTO(event=EventType.set_message_viewed,
+                                      data=SetMessageViewed(dialog_id=dialog_id,
                                                          message_ids=ids))
             await NotifyService.send_package(pack_to_send, user_ids_list)
             return True

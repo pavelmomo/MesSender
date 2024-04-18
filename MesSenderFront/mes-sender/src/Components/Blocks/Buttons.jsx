@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import styles from "./Styles/Buttons.module.css";
+import styles from "../Styles/Buttons.module.css";
 import classNames from "classnames";
 
 export function ButtonWithIcon({ icon, style, text, linkPath, onClick }) {

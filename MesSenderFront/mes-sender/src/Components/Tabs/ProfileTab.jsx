@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import styles from "../Styles/ProfileTab.module.css";
-import { TextFieldBase } from "../TextFields/TextField";
-import { PushButton } from "../Buttons";
-import UserCard from "../Blocks/UserCard";
+import { TextFieldBase } from "../Blocks/TextField";
+import { PushButton } from "../Blocks/Buttons";
+import UserCard from "../Cards/UserCard";
+
 export default function ProfileTab() {
   return (
     <div

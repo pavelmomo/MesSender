@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, WebSocket
 
 from starlette.websockets import WebSocketDisconnect
 
-from src.schemas import CommonStatusDTO, MessageCheckDTO, MessageCreateDTO, MessageDTO, Package, EventType
+from src.schemas import CommonStatusDTO, MessageCheckDTO, MessageCreateDTO, MessageDTO, PackageDTO, EventType
 from src.services import MessageService, NotifyService, AuthServiceInstance
 
 from .dependencies import UOW, CurrentUser, Paginator
@@ -48,7 +48,7 @@ async def websocket_endpoint(websocket: WebSocket,
     try:
         while True:
             data = await websocket.receive_json()
-            res = await NotifyService.handle_user_package(Package.model_validate(data),uow,user_id)
+            res = await NotifyService.handle_user_package(PackageDTO.model_validate(data), uow, user_id)
             if res == False:
                 NotifyService.unregister(websocket, user_id)
                 await websocket.close(code=403)

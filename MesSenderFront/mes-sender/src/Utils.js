@@ -4,7 +4,6 @@ export function stringLimit(str, limit) {
 
 var loc = window.location,
   wsUri;
-
 if (loc.protocol === "https:") {
   wsUri = "wss:";
 } else {

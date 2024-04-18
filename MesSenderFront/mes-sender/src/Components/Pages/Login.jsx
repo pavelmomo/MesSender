@@ -1,42 +1,28 @@
-import { TextFieldBase } from "../TextFields/TextField";
-import { PushButton } from "../Buttons";
-import { Link, json, useNavigate } from "react-router-dom";
+import { TextFieldBase } from "../Blocks/TextField";
+import { PushButton } from "../Blocks/Buttons";
+import { Link, useNavigate } from "react-router-dom";
 import styles from "../Styles/LoginRegister.module.css";
-import { useEffect, useContext, useCallback } from "react";
+import { useContext, useCallback } from "react";
 import { AuthContext } from "../AuthProvider";
-import ModalWindow from "../Blocks/ModalWindow";
-import { url } from "../../App";
 
 export default function Login() {
-  const { setModalOpen } = useContext(AuthContext);
+  const { showModal, login } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const handleSubmit = useCallback(
-    async (e) => {
-      e.preventDefault();
-      const response = await fetch(`/api/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          username: e.target.username.value,
-          password: e.target.password.value,
-        }),
-      });
-      switch (response.status) {
-        case 204:
-          navigate("/");
-          break;
-        case 400:
-        case 422:
-          setModalOpen(true);
-          break;
-        default:
-      }
-    },
-    [navigate, setModalOpen]
-  );
+  const handleSubmit = useCallback(async (e) => {
+    e.preventDefault();
+    const stat = await login(e);
+    switch (stat) {
+      case 204:
+        navigate("/");
+        break;
+      case 400:
+      case 422:
+        showModal("Введены неверные данные");
+        break;
+      default:
+    }
+  }, []);
   return (
     <div className={styles.mainContainer}>
       <form className={styles.mainForm} onSubmit={handleSubmit}>
@@ -64,7 +50,6 @@ export default function Login() {
           text="Войти"
         ></PushButton>
       </form>
-      <ModalWindow text="Введены неверные данные" />
     </div>
   );
 }

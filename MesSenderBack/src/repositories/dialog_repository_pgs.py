@@ -19,10 +19,11 @@ class DialogRepositoryPgs(AbstractDialogRepository):
                      .correlate(Dialog, DialogUser)
                      )
         query = (select(DialogUser)
-                 .join(DialogUser.dialog)
                  .filter(DialogUser.user_id == user_id)
-                 .join(Message, Message.id == subquery)  # замена с outerjoin, вывод только диалогов с посл. сообщением
+                 .join(Dialog, DialogUser.dialog_id == Dialog.id)
+                 .outerjoin(Message, Message.id == subquery)  # замена с outerjoin, вывод только диалогов с посл. сообщением
                  .outerjoin(User, User.id == DialogUser.remote_user_id)
+                 .options(contains_eager(DialogUser.dialog))
                  .options(contains_eager(DialogUser.remote_user))
                  .options(contains_eager(DialogUser.dialog,
                                          Dialog.messages))
@@ -38,8 +39,7 @@ class DialogRepositoryPgs(AbstractDialogRepository):
 
         query = (select(DialogUser)
                  .filter(and_(DialogUser.user_id == uid,
-                              DialogUser.remote_user_id == remote_uid,
-                              Dialog.is_multiply == False))
+                              DialogUser.remote_user_id == remote_uid))
                  .limit(1)
                  )
         result = await self.session.execute(query)

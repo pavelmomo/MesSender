@@ -3,11 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from starlette.staticfiles import StaticFiles
 
-from src.schemas import UserRead, UserCreate
+from src.schemas import UserReadDTO, UserCreateDTO
 from src.api.routers import all_routers
 from src.db.db_pgs import DatabasePgs
 from src.services import AuthServiceInstance
-from fastapi.templating import Jinja2Templates
+
 
 app = FastAPI(
     title="Web Application", debug=True
@@ -32,7 +32,7 @@ app.include_router(
     tags=["Auth"]
 )
 app.include_router(
-    AuthServiceInstance.fastapi_users.get_register_router(UserRead, UserCreate),
+    AuthServiceInstance.fastapi_users.get_register_router(UserReadDTO, UserCreateDTO),
     prefix="/api/auth",
     tags=["Auth"],
 )

@@ -4,7 +4,7 @@ from typing import Sequence
 
 from fastapi_users_db_sqlalchemy import BaseUserDatabase
 
-from src.models import Dialog, DialogUser, Message
+from src.models import Dialog, DialogUser, Message, User
 
 
 class AbstractDialogRepository(ABC):
@@ -34,11 +34,14 @@ class AbstractUserRepository(ABC, BaseUserDatabase):
     def __init__(self):
         raise NotImplementedError
     @abstractmethod
-    def get_by_username(self, username: str):
+    async def get_by_username(self, username: str) -> User:
         raise NotImplementedError
 
     @abstractmethod
-    def get_by_username_or_email(self, username: str, email: str):
+    async def get_by_username_or_email(self, username: str, email: str) -> User:
+        raise NotImplementedError
+    @abstractmethod
+    async def get_by_partly_username(self, username: str) -> list[User]:
         raise NotImplementedError
     @abstractmethod
     async def check_user_existing(self, user_id: int) -> bool:

@@ -1,0 +1,17 @@
+.messageIconContainer {
+  margin-left: 12px;
+  margin-right: 20px;
+  width: 25px;
+  display: flex;
+  align-items: center;
+}
+.messageContent {
+  margin: 0px;
+  flex: 1;
+}
+
+.messageContainer {
+  display: flex;
+  align-items: center;
+  margin: 10px;
+}

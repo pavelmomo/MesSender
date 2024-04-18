@@ -5,7 +5,7 @@ import AccountCircleTwoToneIcon from "@mui/icons-material/AccountCircleTwoTone";
 import SmsTwoToneIcon from "@mui/icons-material/SmsTwoTone";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import styles from "../Styles/Menu.module.css";
-import { ButtonWithIcon } from "../Buttons";
+import { ButtonWithIcon } from "./Buttons";
 import { AuthContext } from "../AuthProvider";
 
 const userMenuList = [
@@ -23,9 +23,10 @@ export default function Menu() {
     <div className={styles.mainContainer}>
       <div
         style={{
-          flex: 2.5,
+          flex: 3,
           textAlign: "center",
           alignContent: "center",
+          minHeight: "120px",
         }}
       >
         <h5 className={styles.mainLogo}>Me$$ender</h5>

@@ -12,7 +12,7 @@ class EventType(str,enum.Enum):
     set_message_viewed = 'set_message_viewed'
 
 
-class Package(BaseModel):
+class PackageDTO(BaseModel):
     event: EventType
     data : MessageDTO | MessageCreateDTO | SetMessageViewed
 

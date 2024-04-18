@@ -1,9 +1,6 @@
 from src.repositories import AbstractUOW
-from src.schemas import Package
+from src.schemas import PackageDTO
 from fastapi import WebSocket
-
-
-
 
 class NotifyService:
     connections: dict[int, list[WebSocket]] = dict()
@@ -26,7 +23,7 @@ class NotifyService:
             del NotifyService.connections[user_id]
 
     @staticmethod
-    async def send_package(package: Package, user_ids: list[int]):
+    async def send_package(package: PackageDTO, user_ids: list[int]):
         if len(user_ids) == 0:
             return
         joined_ids: list = list()
@@ -38,7 +35,7 @@ class NotifyService:
                 await i.send_json(package.json())
 
     @staticmethod
-    async def handle_user_package(package: Package, uow : AbstractUOW, user_id: int) -> bool:
+    async def handle_user_package(package: PackageDTO, uow : AbstractUOW, user_id: int) -> bool:
         from src.services import MessageService
         if package.event == 'send_message':
             package.data.user_id = user_id

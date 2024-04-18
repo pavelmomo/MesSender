@@ -1,10 +1,10 @@
 import { EmailSharp, EmojiPeopleOutlined } from "@mui/icons-material";
 import { DialogsContext } from "../Tabs/DialogsTab";
-import React, { useContext, useState } from "react";
+import React, { memo, useContext, useState } from "react";
 import { stringLimit } from "../../Utils";
 import styles from "../Styles/DialogCard.module.css";
 
-export default function DialogCard({ dialog }) {
+export const DialogCard = memo(({ dialog }) => {
   const { setCurrentDialog } = useContext(DialogsContext);
 
   function chooseDialog() {
@@ -29,4 +29,4 @@ export default function DialogCard({ dialog }) {
       </div>
     </button>
   );
-}
+});

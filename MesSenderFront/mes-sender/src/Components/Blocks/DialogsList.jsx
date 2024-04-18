@@ -1,6 +1,5 @@
-import { Box, Card, Grid, List, ListItem } from "@mui/material";
 import React, { useContext, useState } from "react";
-import DialogCard from "./DialogCard";
+import { DialogCard } from "../Cards/DialogCard";
 import { DialogsContext } from "../Tabs/DialogsTab";
 
 const emptyList = (
@@ -18,7 +17,6 @@ const emptyList = (
 
 export default function DialogsList() {
   const { dialogs } = useContext(DialogsContext);
-
   return (
     <>
       {dialogs.length !== 0 ? (

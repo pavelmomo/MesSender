@@ -1,11 +1,12 @@
 import { createContext, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import ModalWindow from "./Blocks/ModalWindow";
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [isModalOpen, setModalOpen] = useState(false);
+  const [modalState, setModalState] = useState({ isOpen: false });
 
   const getCurrentUser = useCallback(async () => {
     const response = await fetch(`/api/users/current`);
@@ -19,7 +20,7 @@ export const AuthProvider = ({ children }) => {
       default:
         break;
     }
-  }, [navigate]);
+  }, []);
 
   const logout = useCallback(async () => {
     const response = await fetch(`/api/auth/logout`, {
@@ -33,18 +34,56 @@ export const AuthProvider = ({ children }) => {
       default:
         break;
     }
-  }, [navigate]);
+  }, []);
+
+  const login = useCallback(async (e) => {
+    const response = await fetch(`/api/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        username: e.target.username.value,
+        password: e.target.password.value,
+      }),
+    });
+    return response.status;
+  }, []);
+  const register = useCallback(async (e) => {
+    const response = await fetch(`/api/auth/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: e.target.email.value,
+        username: e.target.username.value,
+        password: e.target.password.value,
+      }),
+    });
+    return response.status;
+  }, []);
+  const showModal = useCallback((text) => {
+    setModalState({ isOpen: true, text: text });
+  }, []);
 
   const contextValue = {
     user,
     setUser,
-    isModalOpen,
-    setModalOpen,
     getCurrentUser,
     logout,
+    login,
+    register,
+    showModal,
   };
 
   return (
-    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>
+      {children}
+      <ModalWindow
+        modalState={modalState}
+        setModalState={setModalState}
+      ></ModalWindow>
+    </AuthContext.Provider>
   );
 };

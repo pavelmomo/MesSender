@@ -41,7 +41,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
 
     async def authenticate(
             self, credentials: OAuth2PasswordRequestForm
-    ) -> Optional[models.UP]:
+    ) -> User | None:
 
         try:
             user = await self.get_by_username(credentials.username)
@@ -58,7 +58,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
             await self.user_db.update(user, {"hashed_password": updated_password_hash})
         return user
 
-    async def get_by_username(self, username: str) -> models.UP:
+    async def get_by_username(self, username: str) -> User:
         user = await self.user_db.get_by_username(username)
         if user is None:
             raise exceptions.UserNotExists()

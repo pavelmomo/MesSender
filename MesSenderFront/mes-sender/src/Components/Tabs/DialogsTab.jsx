@@ -10,6 +10,7 @@ import Dialog from "../Blocks/Dialog";
 import styles from "../Styles/DialogsTab.module.css";
 import { AuthContext } from "../AuthProvider";
 import { wsUri } from "../../Utils";
+
 export const DialogsContext = createContext(null);
 
 export default function DialogsTab() {
@@ -19,12 +20,13 @@ export default function DialogsTab() {
   const [currentDialog, setCurrentDialog] = useState(null);
   const [dialogWS, setDialogWS] = useState(null);
 
-  const loadDialogs = useCallback(async () => {
-    const dialogs = await fetch(`/api/dialogs/`).then(
-      (response) => response.json(),
-      () => console.log("Response error!")
-    );
-    setDialogs(dialogs);
+  const loadDialogs = useCallback(() => {
+    fetch(`/api/dialogs/`)
+      .then(
+        (response) => response.json(),
+        () => console.log("Response error!")
+      )
+      .then((data) => setDialogs(data));
   }, []);
 
   const handleNewMessage = useCallback(
@@ -97,14 +99,12 @@ export default function DialogsTab() {
     },
     [currentDialog, dialogs, dialogWS, user, messages, loadDialogs]
   );
-
   useEffect(() => {
     loadDialogs();
     const ws = new WebSocket(`${wsUri}/api/messages/ws`);
     setDialogWS(ws);
     return () => ws.close();
-  }, []);
-
+  }, [loadDialogs]);
   useEffect(() => {
     if (dialogWS !== null) {
       dialogWS.onmessage = handleNewMessage;

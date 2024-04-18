@@ -1,8 +1,9 @@
 import React, { useCallback, useContext, useRef, useEffect } from "react";
+import { MessageCard } from "../Cards/MessageCard";
 import styles from "../Styles/Dialog.module.css";
 import { ArrowBackIosNewSharp, Person2Rounded } from "@mui/icons-material";
-import { IconButton, PushButton } from "../Buttons";
-import { TextFieldBase } from "../TextFields/TextField";
+import { IconButton, PushButton } from "./Buttons";
+import { TextFieldBase } from "./TextField";
 import { DialogsContext } from "../Tabs/DialogsTab";
 import { AuthContext } from "../AuthProvider";
 
@@ -11,20 +12,6 @@ const EmptyDialog = (
     <p className={styles.emptyTextStyle}>Диалог не выбран</p>
   </div>
 );
-
-function Message({ text, isAuthored }) {
-  return (
-    <div className={styles.messageContainer}>
-      <div className={styles.messageIconContainer}>
-        {!isAuthored && <Person2Rounded sx={{ margin: 0 }} />}
-        {isAuthored && (
-          <p style={{ fontSize: 17, fontWeight: "300", margin: 0 }}>Вы</p>
-        )}
-      </div>
-      <p className={styles.messageContent}>{text}</p>
-    </div>
-  );
-}
 
 export default function Dialog() {
   const messageListContainer = useRef(null);
@@ -114,10 +101,10 @@ export default function Dialog() {
                         : "var(--main-light-color)",
                   }}
                 >
-                  <Message
+                  <MessageCard
                     isAuthored={message.user_id === user.id ? true : false}
                     text={message.text}
-                  ></Message>
+                  ></MessageCard>
                 </li>
               ))}
             </ul>
