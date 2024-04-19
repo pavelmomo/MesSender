@@ -7,9 +7,13 @@ export function TextFieldBase({
   placeholder = "",
   className,
   name,
+  defaultValue,
+  isDisabled,
 }) {
   return (
     <input
+      disabled={isDisabled ? "disabled" : ""}
+      defaultValue={defaultValue}
       autoComplete="off"
       name={name}
       type={type}

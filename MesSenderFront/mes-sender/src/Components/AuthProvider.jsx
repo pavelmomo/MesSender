@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [modalState, setModalState] = useState({ isOpen: false });
 
   const getCurrentUser = useCallback(async () => {
-    const response = await fetch(`/api/users/current`);
+    const response = await fetch(`/api/users/me`);
     switch (response.status) {
       case 401:
         navigate("/login");

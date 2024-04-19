@@ -1,3 +1,10 @@
+import DialogsList from "../Blocks/DialogsList";
+import { useSearchParams } from "react-router-dom";
+import Dialog from "../Blocks/Dialog";
+import styles from "../Styles/DialogsTab.module.css";
+import { AuthContext } from "../AuthProvider";
+import { wsUri } from "../../Utils";
+
 import React, {
   useState,
   useEffect,
@@ -5,11 +12,6 @@ import React, {
   createContext,
   useCallback,
 } from "react";
-import DialogsList from "../Blocks/DialogsList";
-import Dialog from "../Blocks/Dialog";
-import styles from "../Styles/DialogsTab.module.css";
-import { AuthContext } from "../AuthProvider";
-import { wsUri } from "../../Utils";
 
 export const DialogsContext = createContext(null);
 
@@ -19,14 +21,25 @@ export default function DialogsTab() {
   const [dialogs, setDialogs] = useState([]);
   const [currentDialog, setCurrentDialog] = useState(null);
   const [dialogWS, setDialogWS] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const loadDialogs = useCallback(() => {
-    fetch(`/api/dialogs/`)
-      .then(
-        (response) => response.json(),
-        () => console.log("Response error!")
-      )
-      .then((data) => setDialogs(data));
+  const loadDialogs = useCallback(async () => {
+    var dialogsBuf = await fetch(`/api/dialogs/`).then(
+      (response) => response.json(),
+      () => console.log("Response error!")
+    );
+    dialogsBuf = dialogsBuf !== null ? dialogsBuf : [];
+    const dialog_id = searchParams.get("dialog_id");
+    if (dialog_id != null) {
+      const dialog_ind = dialogsBuf.findIndex(
+        (e) => e.id === Number(dialog_id)
+      );
+      if (dialog_ind !== -1) {
+        setCurrentDialog(dialogsBuf[dialog_ind]);
+      }
+    }
+    setSearchParams({});
+    setDialogs(dialogsBuf);
   }, []);
 
   const handleNewMessage = useCallback(
@@ -105,6 +118,7 @@ export default function DialogsTab() {
     setDialogWS(ws);
     return () => ws.close();
   }, [loadDialogs]);
+
   useEffect(() => {
     if (dialogWS !== null) {
       dialogWS.onmessage = handleNewMessage;

@@ -102,6 +102,7 @@ export default function Dialog() {
                   }}
                 >
                   <MessageCard
+                    dateTime={message.created_at}
                     isAuthored={message.user_id === user.id ? true : false}
                     text={message.text}
                   ></MessageCard>

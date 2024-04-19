@@ -6,7 +6,7 @@ from fastapi_users.db import SQLAlchemyBaseUserTable, SQLAlchemyUserDatabase
 from . import Base, DialogUser
 
 
-class Role(enum.Enum):
+class Role(str,enum.Enum):
     user = 'user',
     moderator = 'moderator'
 

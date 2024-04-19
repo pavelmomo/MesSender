@@ -1,8 +1,9 @@
 import { memo } from "react";
 import styles from "../Styles/MessageCard.module.css";
-import { ArrowBackIosNewSharp, Person2Rounded } from "@mui/icons-material";
+import { timeFormat } from "../../Utils";
+import { Person2Rounded } from "@mui/icons-material";
 
-export const MessageCard = memo(({ text, isAuthored }) => {
+export const MessageCard = memo(({ text, isAuthored, dateTime }) => {
   return (
     <div className={styles.messageContainer}>
       <div className={styles.messageIconContainer}>
@@ -12,6 +13,7 @@ export const MessageCard = memo(({ text, isAuthored }) => {
         )}
       </div>
       <p className={styles.messageContent}>{text}</p>
+      <p className={styles.timeStyle}>{timeFormat(new Date(dateTime + "Z"))}</p>
     </div>
   );
 });

@@ -11,5 +11,10 @@ if (loc.protocol === "https:") {
 }
 //wsUri += "//" + loc.host;
 wsUri += "//" + "localhost:8000";
+const formatTimeOptions = {
+  hour: "2-digit",
+  minute: "2-digit",
+};
+const timeFormat = new Intl.DateTimeFormat("ru-RU", formatTimeOptions).format;
 
-export { wsUri };
+export { wsUri, timeFormat };

@@ -7,8 +7,25 @@
   height: 70%;
   margin: 10px;
   margin-top: 15px;
-  min-width: 400px;
+  min-width: 450px;
+  min-height: 500px;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.profileRow {
+  display: flex;
+  width: 80%;
+  margin: 5px;
+  align-items: center;
+}
+
+.profileButtonsRow {
+  display: flex;
+  width: 90%;
+  margin: 20px;
+
+  align-items: center;
+  justify-content: space-between;
 }

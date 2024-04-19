@@ -8,6 +8,9 @@ class UserReadDTO(schemas.BaseUser[int]):
     username: str = Field(max_length=20)
     role: Role
 
+class UserUpdateDTO(schemas.BaseUserUpdate):
+    username: str = Field(max_length=20)
+
 
 class UserCreateDTO(schemas.BaseUserCreate):
     username: str = Field(max_length=20)

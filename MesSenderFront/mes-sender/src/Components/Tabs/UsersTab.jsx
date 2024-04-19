@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "../Styles/UsersTab.module.css";
 import { TextFieldBase } from "../Blocks/TextField";
 import { PushButton } from "../Blocks/Buttons";
 import { UserCard } from "../Cards/UserCard";
 export default function UsersTab() {
   const [users, setUsers] = useState([]);
+  const navigate = useNavigate();
 
   const createDialog = useCallback(async (remote_uid) => {
     const dialogStatus = await fetch("/api/dialogs/dual", {
@@ -22,14 +24,7 @@ export default function UsersTab() {
     if (dialogStatus === null) {
       return;
     }
-    switch (dialogStatus.status) {
-      case "created":
-        break;
-      case "existed":
-        alert("dialog exist");
-        break;
-      default:
-    }
+    navigate(`/dialogs?dialog_id=${dialogStatus.dialog_id}`);
   }, []);
 
   const handleSubmit = useCallback((e) => {

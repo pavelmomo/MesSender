@@ -1,9 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
 from starlette.staticfiles import StaticFiles
 
-from src.schemas import UserReadDTO, UserCreateDTO
+from src.schemas import UserReadDTO, UserCreateDTO, UserUpdateDTO
 from src.api.routers import all_routers
 from src.db.db_pgs import DatabasePgs
 from src.services import AuthServiceInstance
@@ -36,14 +35,14 @@ app.include_router(
     prefix="/api/auth",
     tags=["Auth"],
 )
+app.include_router(
+    AuthServiceInstance.fastapi_users.get_users_router(UserReadDTO,UserUpdateDTO),
+    prefix="/api/users",
+    tags=["Users"],
+)   
 app.mount("/", StaticFiles(directory="public", html=True))
 
 
 @app.on_event("startup")
 async def database_init():
     await DatabasePgs.init_db()
-
-
-# @app.get("/")
-# async def index():
-#     return RedirectResponse("/docs")
