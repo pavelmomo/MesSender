@@ -28,7 +28,7 @@ class DatabasePgs:
 
     @staticmethod
     async def create_and_init_tables(engine: AsyncEngine):
-        from src.models import Base, User
+        from models import Base, User
         async with engine.connect() as conn:
             await conn.run_sync(Base.metadata.create_all)
             await conn.execute(

@@ -1,0 +1,7 @@
+FROM python:3.12.3-bullseye
+COPY ./requirements.txt /usr/app/MesSender/requirements.txt
+WORKDIR /usr/app/MesSender
+RUN pip install -r requirements.txt
+COPY . /usr/app/MesSender
+EXPOSE 8000
+CMD python3 main.py

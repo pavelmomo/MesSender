@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  pg_db:
+    image: postgres:alpine3.19
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=postgres
+
+  backend:
+    build: ./src
+    restart: on-failure:3
+    depends_on:
+      - pg_db
+    ports:
+      - 8000:8000
