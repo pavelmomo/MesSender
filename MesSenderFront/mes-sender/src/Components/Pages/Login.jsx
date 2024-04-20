@@ -16,7 +16,7 @@ export default function Login() {
       case 204:
         navigate("/");
         break;
-      case 400:
+      case 401:
       case 422:
         showModal("Введены неверные данные");
         break;

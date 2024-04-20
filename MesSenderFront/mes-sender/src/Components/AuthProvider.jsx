@@ -40,9 +40,9 @@ export const AuthProvider = ({ children }) => {
     const response = await fetch(`/api/auth/login`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Type": "application/json",
       },
-      body: new URLSearchParams({
+      body: JSON.stringify({
         username: e.target.username.value,
         password: e.target.password.value,
       }),

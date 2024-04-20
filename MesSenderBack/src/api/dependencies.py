@@ -5,7 +5,6 @@ from src.models import User
 from src.repositories import UnitOfWorkPgs, AbstractUOW
 
 
-
 class Paginator(BaseModel):
     limit: Annotated[int, Field(ge=0)]
     offset: Annotated[int, Field(ge=0)]
@@ -19,4 +18,6 @@ async def _get_uow():
 
 
 UOW = Annotated[AbstractUOW, Depends(_get_uow)]
-CurrentUser = Annotated[User, Depends(_get_uow)]
+from src.api.auth_router import authorize_http_endpoint
+
+CurrentUser = Annotated[User, Depends(authorize_http_endpoint)]

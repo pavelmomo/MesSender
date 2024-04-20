@@ -11,13 +11,14 @@ export default function Register() {
 
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
-    const stat = register(e);
+    const stat = await register(e);
+    console.log(stat);
     switch (stat) {
-      case 201:
+      case 200:
         navigate("/login");
         break;
-      case 400:
       case 422:
+      case 409:
         showModal(
           "Введены некорректные данные или пользователь уже существует"
         );

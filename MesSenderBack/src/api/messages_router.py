@@ -1,9 +1,16 @@
 import datetime
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, WebSocket
+from typing import Annotated
+from fastapi import APIRouter, Depends, HTTPException, WebSocket
 
 from starlette.websockets import WebSocketDisconnect
-
-from src.schemas import CommonStatusDTO, MessageCheckDTO, MessageCreateDTO, MessageDTO, PackageDTO, EventType
+from src.api.auth_router import authorize_ws_endpoint
+from src.schemas import (
+    CommonStatusDTO,
+    MessageCreateDTO,
+    MessageDTO,
+    PackageDTO,
+    UserDTO,
+)
 from src.services import MessageService, NotifyService
 
 from .dependencies import UOW, CurrentUser, Paginator
@@ -27,7 +34,7 @@ async def send_message(id: int, message: MessageCreateDTO, uow: UOW, user: Curre
     "/dialogs/{id}/messages", response_model=list[MessageDTO]
 )  # запрос сообщений из диалога
 async def get_messages(
-        id: int, user: CurrentUser, uow: UOW, paginator: Paginator = Depends()
+    id: int, user: CurrentUser, uow: UOW, paginator: Paginator = Depends()
 ):
     result = await MessageService.get_dialog_messages(
         uow, id, user.id, paginator.limit, paginator.offset
@@ -38,21 +45,24 @@ async def get_messages(
 
 
 @router.websocket("/messages/ws")
-async def websocket_endpoint(websocket: WebSocket,
-                             uow: UOW,
-                             user_id: int = 1):
-    if user_id == None:
+async def websocket_endpoint(
+    websocket: WebSocket,
+    uow: UOW,
+    user: Annotated[UserDTO, Depends(authorize_ws_endpoint)],
+):
+    if user is None:
         await websocket.close(code=401)
         return
+    user_id = user.id
     await NotifyService.register(websocket, user_id)
     try:
         while True:
             data = await websocket.receive_json()
-            res = await NotifyService.handle_user_package(PackageDTO.model_validate(data), uow, user_id)
-            if res == False:
+            res = await NotifyService.handle_user_package(
+                PackageDTO.model_validate(data), uow, user_id
+            )
+            if res is False:
                 NotifyService.unregister(websocket, user_id)
                 await websocket.close(code=403)
     except WebSocketDisconnect:
         NotifyService.unregister(websocket, user_id)
-
-

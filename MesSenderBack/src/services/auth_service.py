@@ -21,6 +21,14 @@ class InvalidCredentials(Exception):
     pass
 
 
+class InvalidToken(Exception):
+    pass
+
+
+class TokenExpire(Exception):
+    pass
+
+
 class AuthService:
     crypto_context = CryptContext(schemes=["bcrypt"])
 
@@ -50,6 +58,25 @@ class AuthService:
             raise InvalidCredentials
         token = AuthService.create_jwt_token(db_user.id)
         return token
+
+    @staticmethod
+    async def authorize(token: str, uow: AbstractUOW):
+        decoded_token = AuthService.verify_jwt_token(token)
+        if (
+            decoded_token is None
+            or "sub" not in decoded_token
+            or "exp" not in decoded_token
+        ):
+            raise InvalidToken
+
+        if decoded_token["exp"] - int(time.time()) < 0:
+            raise TokenExpire
+        user_id = decoded_token["sub"]
+        async with uow:
+            user = await uow.users.get_by_id(user_id)
+            if user is None:
+                raise UserNotExist
+            return UserDTO.model_validate(user, from_attributes=True)
 
     @staticmethod
     def create_jwt_token(user_id: int):
