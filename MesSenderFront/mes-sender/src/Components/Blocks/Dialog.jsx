@@ -97,7 +97,7 @@ export default function Dialog() {
                     margin: "5px",
                     backgroundColor:
                       message.status === "viewed"
-                        ? "var(--background-color)"
+                        ? "var(--secondary-color)"
                         : "var(--main-light-color)",
                   }}
                 >

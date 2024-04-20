@@ -36,7 +36,7 @@ class NotifyService:
 
     @staticmethod
     async def handle_user_package(package: PackageDTO, uow : AbstractUOW, user_id: int) -> bool:
-        from src.services import MessageService
+        from services import MessageService
         if package.event == 'send_message':
             package.data.user_id = user_id
             result = await MessageService.send_message(uow, package.data)

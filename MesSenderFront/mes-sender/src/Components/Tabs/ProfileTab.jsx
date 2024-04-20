@@ -107,16 +107,25 @@ export default function ProfileTab() {
         </div>
 
         {!isRowsDisabled && (
-          <div className={styles.newPassword}>
-            <p style={{ flex: 1 }}>Новый пароль:</p>
-            <TextFieldBase
-              type="password"
-              isDisabled={isRowsDisabled}
-              name="new_password"
-              style={{ flex: 2 }}
-              placeholder="Оставьте пустым для сохранения старого пароля"
-            ></TextFieldBase>
-          </div>
+          <>
+            <div
+              style={{
+                width: "80%",
+                borderTop: "2px solid var(--main-color)",
+                margin: "10px",
+              }}
+            ></div>
+            <div className={styles.profileRow}>
+              <p style={{ flex: 1 }}>Новый пароль:</p>
+              <TextFieldBase
+                type="password"
+                isDisabled={isRowsDisabled}
+                name="new_password"
+                style={{ flex: 2 }}
+                placeholder="Оставьте пустым для сохранения старого пароля"
+              ></TextFieldBase>
+            </div>
+          </>
         )}
         {!isRowsDisabled && (
           <div className={styles.profileRow}>
@@ -131,7 +140,7 @@ export default function ProfileTab() {
             ></TextFieldBase>
           </div>
         )}
-        <div style={{ flex: 1 }}></div>
+
         <div className={styles.profileButtonsRow}>
           <PushButton
             text="Редактировать учётные данные"

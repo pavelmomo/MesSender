@@ -22,14 +22,16 @@
   background-color: var(--secondary-color);
   color: var(--contrast-color);
   border-radius: 5px;
-  margin: 5px;
+  margin: 10px;
+  margin-left: 15px;
+  margin-right: 15px;
 }
 
 .buttonIcon {
   box-shadow: none;
   border-radius: 5px;
   color: var(--contrast-color);
-  background-color: var(--background-color);
+  background-color: var(--secondary-color);
 }
 .buttonIcon:active {
   box-shadow: none;
@@ -41,10 +43,11 @@
 
 .pushButton {
   background-color: var(--main-color);
-  color: var(--contrast-color);
+  color: var(--secondary-color);
   height: 70%;
   padding: 10px;
   display: flex;
+  border-radius: 5px;
   align-items: center;
 }
 

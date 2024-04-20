@@ -8,6 +8,7 @@
 .mainForm {
   border: 3px solid;
   border-color: var(--main-color);
+  background-color: var(--secondary-color);
   display: flex;
   flex-direction: column;
   padding: 20px;
