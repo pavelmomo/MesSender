@@ -13,7 +13,10 @@ const userMenuList = [
   [<HailTwoToneIcon />, "Люди", "users", 2],
   [<AccountCircleTwoToneIcon />, "Профиль", "profile", 3],
 ];
-const moderatorMenuList = [[<HailTwoToneIcon />, "Жалобы", "hhh", 4]];
+const moderatorMenuList = [
+  ...userMenuList,
+  [<HailTwoToneIcon />, "Жалобы", "hhh", 4],
+];
 const menuVariants = { user: userMenuList, moderator: moderatorMenuList };
 
 export default function Menu() {

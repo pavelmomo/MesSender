@@ -53,6 +53,10 @@ class AbstractUserRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    async def update_user(self, update_dict: dict) ->  None:
+        raise NotImplementedError
+
+    @abstractmethod
     async def create_user(self, user: User) -> User:
         raise NotImplementedError
 

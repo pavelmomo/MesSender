@@ -11,9 +11,11 @@ class UserDTO(BaseModel):
     role: Role
 
 
-class UserUpdateDTO(schemas.BaseUserUpdate):
+class UserUpdateDTO(BaseModel):
     username: str = Field(max_length=20)
-
+    email: EmailStr
+    password: str
+    new_password: str  = Field(validate_default=False, default="",max_length=20, min_length=4)
 
 class UserReadShortDTO(BaseModel):
     id: int
@@ -21,7 +23,7 @@ class UserReadShortDTO(BaseModel):
 
 
 class UserCreateDTO(BaseModel):
-    username: str = Field(max_length=20)
+    username: str = Field(max_length=20,min_length=4)
     email: EmailStr
     password: str = Field(max_length=20, min_length=4)
 

@@ -18,6 +18,7 @@ async def _get_uow():
 
 
 UOW = Annotated[AbstractUOW, Depends(_get_uow)]
+
 from src.api.auth_router import authorize_http_endpoint
 
 CurrentUser = Annotated[User, Depends(authorize_http_endpoint)]

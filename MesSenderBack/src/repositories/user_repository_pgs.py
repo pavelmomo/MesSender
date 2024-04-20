@@ -1,11 +1,8 @@
-from typing import Type, Optional
-
-from fastapi_users.models import UP
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.models import Dialog, User, DialogUser, Message
-from sqlalchemy import insert, select, update, or_, and_, func
+from sqlalchemy import select, update, or_
+from src.models import User
 from . import AbstractUserRepository
-from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
+
 
 
 class UserRepositoryPgs(AbstractUserRepository):
@@ -42,3 +39,6 @@ class UserRepositoryPgs(AbstractUserRepository):
         self.session.add(user)
         await self.session.commit()
         return user
+    async def update_user(self, update_dict: dict) -> None:
+        await self.session.execute(update(User).returning(User),[update_dict])
+        await self.session.commit()

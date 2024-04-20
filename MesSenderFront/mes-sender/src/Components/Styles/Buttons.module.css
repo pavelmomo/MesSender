@@ -54,3 +54,7 @@
 .pushButton:hover {
   background-color: var(--main-light-color);
 }
+.pushButton:disabled {
+  background-color: var(--main-light-color);
+  cursor: not-allowed;
+}

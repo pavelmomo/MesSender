@@ -43,9 +43,11 @@ export function PushButton({
   type,
   className,
   onSubmit,
+  isDisabled,
 }) {
   return (
     <button
+      disabled={isDisabled ? "disabled" : ""}
       onSubmit={onSubmit}
       type={type}
       style={style}

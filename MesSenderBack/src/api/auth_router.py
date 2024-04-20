@@ -20,8 +20,8 @@ router = APIRouter(prefix="/api/auth", tags=["Auth"])  # создание роу
 async def register(new_user: UserCreateDTO, uow: UOW):
     try:
         return await AuthService.register(new_user, uow)
-    except UserAlreadyExist:
-        raise HTTPException(status_code=409, detail="User alrady exist")
+    except UserAlreadyExist as e:
+        raise HTTPException(status_code=409, detail="User alrady exist") from e
 
 
 @router.post("/login")
@@ -32,8 +32,8 @@ async def login(user: UserLoginDTO, uow: UOW, response: Response):
         response.status_code = 204
         return response
 
-    except (UserNotExist, InvalidCredentials):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+    except (UserNotExist, InvalidCredentials) as e:
+        raise HTTPException(status_code=401, detail="Invalid credentials") from e
 
 
 @router.post("/logout")
@@ -50,11 +50,13 @@ async def authorize_http_endpoint(request: Request, uow: UOW) -> UserDTO:
 
         return await AuthService.authorize(request.cookies[JWT_COOKIE_NAME], uow)
 
-    except (InvalidToken, TokenExpire):
-        raise HTTPException(status_code=401, detail="Token is invalid or expired")
+    except (InvalidToken, TokenExpire) as e:
+        raise HTTPException(
+            status_code=401, detail="Token is invalid or expired"
+        ) from e
 
-    except UserNotExist:
-        raise HTTPException(status_code=401, detail="Token user not exist")
+    except UserNotExist as e:
+        raise HTTPException(status_code=401, detail="Token user not exist") from e
 
 
 async def authorize_ws_endpoint(websocket: WebSocket, uow: UOW) -> UserDTO | None:

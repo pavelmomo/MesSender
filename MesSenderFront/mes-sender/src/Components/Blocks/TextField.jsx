@@ -9,10 +9,14 @@ export function TextFieldBase({
   name,
   defaultValue,
   isDisabled,
+  onChange,
+  value,
 }) {
   return (
     <input
       disabled={isDisabled ? "disabled" : ""}
+      onChange={onChange}
+      value={value}
       defaultValue={defaultValue}
       autoComplete="off"
       name={name}

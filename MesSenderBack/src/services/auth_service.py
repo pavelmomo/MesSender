@@ -1,32 +1,11 @@
-from datetime import datetime
 import time
-from . import UserService
 import jwt
 from passlib.context import CryptContext
 from src.repositories import AbstractUOW
-from src.config import JWT_SECRET, JWT_COOKIE_NAME, JWT_EXPIRATION_TIME, JWT_ALGORITHM
+from src.config import JWT_SECRET, JWT_EXPIRATION_TIME, JWT_ALGORITHM
 from src.models import User
-from src.schemas import UserCreateDTO, UserDTO, UserLoginDTO
-
-
-class UserNotExist(Exception):
-    pass
-
-
-class UserAlreadyExist(Exception):
-    pass
-
-
-class InvalidCredentials(Exception):
-    pass
-
-
-class InvalidToken(Exception):
-    pass
-
-
-class TokenExpire(Exception):
-    pass
+from src.schemas import UserCreateDTO, UserDTO, UserLoginDTO, UserUpdateDTO
+from . import UserService
 
 
 class AuthService:
@@ -77,6 +56,27 @@ class AuthService:
             if user is None:
                 raise UserNotExist
             return UserDTO.model_validate(user, from_attributes=True)
+        
+    @staticmethod
+    async def update_user(update: UserUpdateDTO, user_id: str, uow: AbstractUOW):
+        async with uow:
+            db_user = await uow.users.get_by_id(user_id)
+            updated_user = {"id": db_user.id}
+            if db_user.username != update.username or db_user.email != update.email:
+                check = await uow.users.get_by_username_or_email(update.username, update.email)
+                if check is not None and check.id != user_id:
+                    raise UserAlreadyExist()
+                updated_user["email"] = update.email
+                updated_user["username"] = update.username
+            pass_verify = AuthService.crypto_context.verify(update.password, db_user.password)
+            if not pass_verify:
+                raise InvalidCredentials
+            if update.new_password != "":
+                new_pass = AuthService.crypto_context.hash(update.new_password)
+                updated_user["password"] = new_pass
+            await uow.users.update_user(updated_user)
+            
+
 
     @staticmethod
     def create_jwt_token(user_id: int):
@@ -92,3 +92,25 @@ class AuthService:
             return decoded_data
         except jwt.PyJWTError:
             return None
+
+
+
+class UserNotExist(Exception):
+    pass
+
+
+class UserAlreadyExist(Exception):
+    pass
+
+
+class InvalidCredentials(Exception):
+    pass
+
+
+class InvalidToken(Exception):
+    pass
+
+
+class TokenExpire(Exception):
+    pass
+
