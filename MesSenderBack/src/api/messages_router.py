@@ -3,15 +3,15 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, WebSocket
 
 from starlette.websockets import WebSocketDisconnect
-from src.api.auth_router import authorize_ws_endpoint
-from src.schemas import (
+from api.auth_router import authorize_ws_endpoint
+from schemas import (
     CommonStatusDTO,
     MessageCreateDTO,
     MessageDTO,
     PackageDTO,
     UserDTO,
 )
-from src.services import MessageService, NotifyService
+from services import MessageService, NotifyService
 
 from .dependencies import UOW, CurrentUser, Paginator
 

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-from src.schemas import DialogCreateRespDTO, DialogDTO, DualDialogCreateReqDTO
-from src.services import DialogService
+from schemas import DialogCreateRespDTO, DialogDTO, DualDialogCreateReqDTO
+from services import DialogService
 
 from .dependencies import UOW, CurrentUser, Paginator
 

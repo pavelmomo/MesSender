@@ -1,6 +1,6 @@
-from src.repositories import AbstractUOW
-from src.schemas import UserReadShortDTO
-from src.models import User
+from repositories import AbstractUOW
+from schemas import UserReadShortDTO
+from models import User
 
 
 class UserService:

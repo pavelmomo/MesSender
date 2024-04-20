@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Sequence
-from src.models import DialogUser, Message, User
+from models import DialogUser, Message, User
 
 
 class AbstractDialogRepository(ABC):

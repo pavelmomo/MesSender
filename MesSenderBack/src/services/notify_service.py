@@ -1,5 +1,5 @@
-from src.repositories import AbstractUOW
-from src.schemas import PackageDTO
+from repositories import AbstractUOW
+from schemas import PackageDTO
 from fastapi import WebSocket
 
 class NotifyService:

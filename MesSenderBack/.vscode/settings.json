@@ -1,7 +1,7 @@
 {
     "python.languageServer": "Pylance",
     "javascript.preferences.importModuleSpecifier": "project-relative",
-    "pylint.cwd": "${workspaceFolder}",
+    "pylint.cwd": "${workspaceFolder}/src",
     "files.exclude": {
         "**/__pycache__": true
     },

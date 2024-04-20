@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import (
     AsyncEngine,
 )
 from sqlalchemy import text
-from src.config import DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS, MODERATOR_PASS
+from config import DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS, MODERATOR_PASS
 
 
 class DatabasePgs:

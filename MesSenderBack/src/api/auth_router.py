@@ -1,9 +1,9 @@
 from fastapi import HTTPException, Response, Request, WebSocket
 from fastapi import APIRouter
-from src.config import JWT_COOKIE_NAME
-from src.api.dependencies import UOW
-from src.schemas import UserCreateDTO, UserLoginDTO, UserDTO
-from src.services import (
+from config import JWT_COOKIE_NAME
+from api.dependencies import UOW
+from schemas import UserCreateDTO, UserLoginDTO, UserDTO
+from services import (
     AuthService,
     UserAlreadyExist,
     UserNotExist,

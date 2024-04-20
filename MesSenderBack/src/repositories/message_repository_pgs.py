@@ -1,10 +1,6 @@
-import datetime
-from typing import Sequence
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import contains_eager
-
-from src.models import Message, MessageStatus, Dialog, DialogUser, User
-from sqlalchemy import select, update, and_, text
+from models import Message, MessageStatus, Dialog, DialogUser
+from sqlalchemy import select, update, and_
 from . import AbstractMessageRepository
 
 
@@ -18,7 +14,7 @@ class MessageRepositoryPgs(AbstractMessageRepository):
         return message.id
 
     async def get_messages(self, dialog_id: int, user_id: int,
-                           limit: int, offset: int) -> (Sequence[Message], Sequence[int]):
+                           limit: int, offset: int) -> (list[Message], list[int]):
         query = (select(Message)
                  .join(Dialog, Message.dialog_id == dialog_id)
                  .join(DialogUser, and_(DialogUser.user_id == user_id, DialogUser.dialog_id == Dialog.id))

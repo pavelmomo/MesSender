@@ -1,10 +1,10 @@
 import time
 import jwt
 from passlib.context import CryptContext
-from src.repositories import AbstractUOW
-from src.config import JWT_SECRET, JWT_EXPIRATION_TIME, JWT_ALGORITHM
-from src.models import User
-from src.schemas import UserCreateDTO, UserDTO, UserLoginDTO, UserUpdateDTO
+from repositories import AbstractUOW
+from config import JWT_SECRET, JWT_EXPIRATION_TIME, JWT_ALGORITHM
+from models import User
+from schemas import UserCreateDTO, UserDTO, UserLoginDTO, UserUpdateDTO
 from . import UserService
 
 

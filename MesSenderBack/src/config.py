@@ -1,5 +1,4 @@
 from os import environ
-
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -14,4 +13,3 @@ JWT_COOKIE_NAME = environ.get("JWT_COOKIE_NAME")
 JWT_ALGORITHM = environ.get("JWT_ALGORITHM")
 JWT_EXPIRATION_TIME = int(environ.get("JWT_EXPIRATION_TIME"))
 MODERATOR_PASS = environ.get("MODERATOR_PASS")
-

@@ -1,7 +1,7 @@
-from src.repositories import AbstractUOW
-from src.models import Message
-from src.schemas import (MessageCreateDTO, CommonStatusDTO,
-                         MessageDTO, PackageDTO, EventType, SetMessageViewed)
+from repositories import AbstractUOW
+from models import Message
+from schemas import (MessageCreateDTO, CommonStatusDTO,
+                    MessageDTO, PackageDTO, EventType, SetMessageViewed)
 from . import NotifyService
 
 

@@ -1,6 +1,4 @@
-import asyncio
-import anyio
-from src.db.db_pgs import DatabasePgs
+from db.db_pgs import DatabasePgs
 from . import (AbstractUOW,
                MessageRepositoryPgs,
                UserRepositoryPgs,

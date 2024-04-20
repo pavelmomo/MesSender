@@ -1,7 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
-
-from fastapi_users import schemas
-from src.models import Role
+from models import Role
 
 
 class UserDTO(BaseModel):

@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, or_
-from src.models import User
+from models import User
 from . import AbstractUserRepository
 
 

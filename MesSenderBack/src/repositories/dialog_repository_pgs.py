@@ -1,6 +1,6 @@
 from typing import Sequence
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.models import Dialog, User, DialogUser, Message
+from models import Dialog, User, DialogUser, Message
 from sqlalchemy import insert, select, update, or_, and_
 from sqlalchemy.orm import joinedload, contains_eager
 from . import AbstractDialogRepository

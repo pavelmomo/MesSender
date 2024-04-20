@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Response
-from src.schemas import UserReadShortDTO, UserDTO, UserUpdateDTO
-from src.services import UserService, AuthService, UserAlreadyExist, InvalidCredentials
+from schemas import UserReadShortDTO, UserDTO, UserUpdateDTO
+from services import UserService, AuthService, UserAlreadyExist, InvalidCredentials
 from .dependencies import UOW, CurrentUser
 
 router = APIRouter(prefix="/api/users", tags=["Users"])  # создание роутера

@@ -1,6 +1,5 @@
 import datetime
-
-from src.models import MessageStatus
+from models import MessageStatus
 from typing import Optional
 from pydantic import BaseModel, Field
 

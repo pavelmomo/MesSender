@@ -1,11 +1,11 @@
 from typing import List
-from src.repositories import AbstractUOW
-from src.schemas import (
+from repositories import AbstractUOW
+from schemas import (
     DialogDTO,
     DialogViewStatus,
     DialogCreateRespDTO,
 )
-from src.models import MessageStatus
+from models import MessageStatus
 
 
 class DialogService:

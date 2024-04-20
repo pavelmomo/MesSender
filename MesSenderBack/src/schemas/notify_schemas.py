@@ -1,6 +1,6 @@
-from . import MessageDTO, MessageCreateDTO
 import enum
 from pydantic import BaseModel
+from . import MessageDTO, MessageCreateDTO
 
 class SetMessageViewed(BaseModel):
     message_ids: list[int]
