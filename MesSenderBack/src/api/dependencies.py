@@ -3,7 +3,7 @@ from fastapi import Depends
 from pydantic import BaseModel, Field
 from src.models import User
 from src.repositories import UnitOfWorkPgs, AbstractUOW
-from src.services import AuthServiceInstance
+
 
 
 class Paginator(BaseModel):
@@ -19,4 +19,4 @@ async def _get_uow():
 
 
 UOW = Annotated[AbstractUOW, Depends(_get_uow)]
-CurrentUser = Annotated[User, Depends(AuthServiceInstance.current_user)]
+CurrentUser = Annotated[User, Depends(_get_uow)]

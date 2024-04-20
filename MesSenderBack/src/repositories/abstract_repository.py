@@ -1,10 +1,6 @@
-import datetime
 from abc import ABC, abstractmethod
 from typing import Sequence
-
-from fastapi_users_db_sqlalchemy import BaseUserDatabase
-
-from src.models import Dialog, DialogUser, Message, User
+from src.models import DialogUser, Message, User
 
 
 class AbstractDialogRepository(ABC):
@@ -13,7 +9,9 @@ class AbstractDialogRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_active_user_dialogs(self, user_id: int, limit: int, offset: int) -> Sequence[DialogUser]:
+    async def get_active_user_dialogs(
+        self, user_id: int, limit: int, offset: int
+    ) -> Sequence[DialogUser]:
         raise NotImplementedError
 
     @abstractmethod
@@ -29,22 +27,33 @@ class AbstractDialogRepository(ABC):
         raise NotImplementedError
 
 
-class AbstractUserRepository(ABC, BaseUserDatabase):
+class AbstractUserRepository(ABC):
     @abstractmethod
     def __init__(self):
         raise NotImplementedError
+
     @abstractmethod
-    async def get_by_username(self, username: str) -> User:
+    async def get_by_id(self, user_id: int) -> User | None:
         raise NotImplementedError
 
     @abstractmethod
     async def get_by_username_or_email(self, username: str, email: str) -> User:
         raise NotImplementedError
+
+    @abstractmethod
+    async def get_by_username(self, username: str) -> User | None:
+        raise NotImplementedError
+
     @abstractmethod
     async def get_by_partly_username(self, username: str) -> list[User]:
         raise NotImplementedError
+
     @abstractmethod
     async def check_user_existing(self, user_id: int) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def create_user(self, user: User) -> User:
         raise NotImplementedError
 
 
@@ -58,18 +67,21 @@ class AbstractMessageRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_messages(self, dialog_id: int, user_id: int,
-                           limit: int, offset: int) -> Sequence[Message]:
+    async def get_messages(
+        self, dialog_id: int, user_id: int, limit: int, offset: int
+    ) -> Sequence[Message]:
         raise NotImplementedError
 
     @abstractmethod
     async def set_viewed_status(self, ids: list[int], dialog_id: int) -> bool:
         raise NotImplementedError
 
+
 class AbstractUOW(ABC):
     users: AbstractUserRepository
     messages: AbstractMessageRepository
     dialogs: AbstractDialogRepository
+
     @abstractmethod
     def __init__(self):
         raise NotImplementedError

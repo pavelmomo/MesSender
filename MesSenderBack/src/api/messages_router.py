@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, WebSocket
 from starlette.websockets import WebSocketDisconnect
 
 from src.schemas import CommonStatusDTO, MessageCheckDTO, MessageCreateDTO, MessageDTO, PackageDTO, EventType
-from src.services import MessageService, NotifyService, AuthServiceInstance
+from src.services import MessageService, NotifyService
 
 from .dependencies import UOW, CurrentUser, Paginator
 
@@ -40,7 +40,7 @@ async def get_messages(
 @router.websocket("/messages/ws")
 async def websocket_endpoint(websocket: WebSocket,
                              uow: UOW,
-                             user_id: int = Depends(AuthServiceInstance.authorize_ws_endpoint)):
+                             user_id: int = 1):
     if user_id == None:
         await websocket.close(code=401)
         return

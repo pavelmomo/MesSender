@@ -8,20 +8,37 @@ from . import AbstractUserRepository
 from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
 
 
-class UserRepositoryPgs(AbstractUserRepository, SQLAlchemyUserDatabase):
+class UserRepositoryPgs(AbstractUserRepository):
+
     def __init__(self, session: AsyncSession):
-        SQLAlchemyUserDatabase.__init__(self, session, User)
-    async def get_by_username(self, username: str) -> User:
-        statement = select(User).where(User.username == username)
-        return await self._get_user(statement)
-    async def get_by_username_or_email(self, username: str, email: str) -> User:
-        statement = select(User).where(or_(User.username == username, User.email == email))
-        return await self._get_user(statement)
+        self.session = session
+
+    async def get_by_id(self, user_id: int) -> User | None:
+        query = select(User).where(User.id == user_id)
+        return await self.session.scalar(query)
+
+    async def get_by_username(self, username: str) -> User | None:
+        query = select(User).where(User.username == username)
+        return await self.session.scalar(query)
+
+    async def get_by_username_or_email(self, username: str, email: str) -> User | None:
+        query = (
+            select(User)
+            .where(or_(User.username == username, User.email == email))
+            .limit(1)
+        )
+        return await self.session.scalar(query)
+
     async def check_user_existing(self, user_id: int) -> bool:
         result = await self.session.get(User, user_id)
-        return False if result is None \
-            else True
+        return False if result is None else True
+
     async def get_by_partly_username(self, username: str) -> list[User]:
-        statement = select(User).where(User.username.contains(username))
-        result = await self.session.scalars(statement)
+        query = select(User).where(User.username.contains(username))
+        result = await self.session.scalars(query)
         return result.all()
+
+    async def create_user(self, user: User) -> User:
+        self.session.add(user)
+        await self.session.commit()
+        return user
