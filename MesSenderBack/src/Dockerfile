@@ -4,4 +4,4 @@ WORKDIR /usr/app/MesSender
 RUN pip install -r requirements.txt
 COPY . /usr/app/MesSender
 EXPOSE 8000
-CMD python3 main.py
+CMD uvicorn server:app --host 0.0.0.0
