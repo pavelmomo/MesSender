@@ -1,14 +1,16 @@
 version: '3.8'
 
 services:
+
   pg_db:
     image: postgres:alpine3.19
     restart: always
     environment:
       - POSTGRES_PASSWORD=postgres
-
   backend:
-    build: ./src
+    build:
+      dockerfile: ./Dockerfile
+      context: ./MesSenderBack
     restart: on-failure:3
     depends_on:
       - pg_db
@@ -17,5 +19,10 @@ services:
       - DB_PORT=5432
       - DB_PASS=postgres
       - DB_USER=postgres
+
+  proxy:
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile
     ports:
-      - 8000:8000
+      - 8888:80

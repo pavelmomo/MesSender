@@ -37,3 +37,4 @@ class MessageRepositoryPgs(AbstractMessageRepository):
                  .where( and_(Message.id.in_(ids), Message.dialog_id == dialog_id))
                  .values(status='viewed'))
         await self.session.execute(query)
+        await self.session.commit()

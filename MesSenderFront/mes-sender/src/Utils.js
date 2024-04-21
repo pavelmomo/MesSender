@@ -9,8 +9,14 @@ if (loc.protocol === "https:") {
 } else {
   wsUri = "ws:";
 }
-//wsUri += "//" + loc.host;
-wsUri += "//" + "localhost:8000";
+if (loc.host === "localhost:3000"){
+  wsUri += "//" + "localhost:8000";
+}
+else{
+  wsUri += "//" + loc.host;
+}
+
+//
 const formatTimeOptions = {
   hour: "2-digit",
   minute: "2-digit",
