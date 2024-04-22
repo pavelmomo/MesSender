@@ -3,19 +3,13 @@ from fastapi import APIRouter
 from config import JWT_COOKIE_NAME
 from api.dependencies import UOW
 from schemas import UserCreateDTO, UserLoginDTO, UserDTO
-from services import (
-    AuthService,
-    UserAlreadyExist,
-    UserNotExist,
-    InvalidCredentials,
-    InvalidToken,
-    TokenExpire,
-)
-
+from services import AuthService
+from services.exceptions import *
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])  # создание роутера
 
 
+# эндпоинт регистрации
 @router.post("/register")
 async def register(new_user: UserCreateDTO, uow: UOW):
     try:
@@ -24,6 +18,7 @@ async def register(new_user: UserCreateDTO, uow: UOW):
         raise HTTPException(status_code=409, detail="User alrady exist") from e
 
 
+# эндпоинт входа в аккаунт
 @router.post("/login")
 async def login(user: UserLoginDTO, uow: UOW, response: Response):
     try:
@@ -36,6 +31,7 @@ async def login(user: UserLoginDTO, uow: UOW, response: Response):
         raise HTTPException(status_code=401, detail="Invalid credentials") from e
 
 
+# эндпоинт выхода из аккаунта
 @router.post("/logout")
 async def logout(response: Response):
     response.delete_cookie(key=JWT_COOKIE_NAME)
@@ -43,6 +39,7 @@ async def logout(response: Response):
     return response
 
 
+# метод авторизации эндпоинта http, используется при помощи Depends
 async def authorize_http_endpoint(request: Request, uow: UOW) -> UserDTO:
     if not JWT_COOKIE_NAME in request.cookies:
         raise HTTPException(status_code=401, detail="Unauthorized")
@@ -59,6 +56,7 @@ async def authorize_http_endpoint(request: Request, uow: UOW) -> UserDTO:
         raise HTTPException(status_code=401, detail="Token user not exist") from e
 
 
+# метод авторизации эндпоинта ws, используется при помощи Depends
 async def authorize_ws_endpoint(websocket: WebSocket, uow: UOW) -> UserDTO | None:
     if not JWT_COOKIE_NAME in websocket.cookies:
         raise HTTPException(status_code=401, detail="Unauthorized")

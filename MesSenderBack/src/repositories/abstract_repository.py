@@ -4,6 +4,9 @@ from models import DialogUser, Message, User
 
 
 class AbstractDialogRepository(ABC):
+    """
+    Репозиторий для сущности Dialog и DialogUser
+    """
     @abstractmethod
     def __init__(self):
         raise NotImplementedError
@@ -28,6 +31,9 @@ class AbstractDialogRepository(ABC):
 
 
 class AbstractUserRepository(ABC):
+    """
+    Репозиторий для сущности User
+    """
     @abstractmethod
     def __init__(self):
         raise NotImplementedError
@@ -62,6 +68,9 @@ class AbstractUserRepository(ABC):
 
 
 class AbstractMessageRepository(ABC):
+    """
+    Репозиторий для сущности Меssage
+    """
     @abstractmethod
     def __init__(self):
         raise NotImplementedError
@@ -82,6 +91,9 @@ class AbstractMessageRepository(ABC):
 
 
 class AbstractUOW(ABC):
+    """
+    Определение интерфейса для паттерна Unit Of Work
+    """
     users: AbstractUserRepository
     messages: AbstractMessageRepository
     dialogs: AbstractDialogRepository

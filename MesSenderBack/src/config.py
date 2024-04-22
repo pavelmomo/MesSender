@@ -1,6 +1,11 @@
 from os import environ
 from dotenv import load_dotenv
 
+"""
+В данном модуле происходит загрузка переменных окружения из файла .env
+и получение значений переменных в приложении
+"""
+
 load_dotenv()
 
 DB_HOST = environ.get("DB_HOST")

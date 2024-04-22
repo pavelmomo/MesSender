@@ -14,6 +14,7 @@ export function TextFieldBase({
 }) {
   return (
     <input
+      maxLength="490"
       disabled={isDisabled ? "disabled" : ""}
       onChange={onChange}
       value={value}

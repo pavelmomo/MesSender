@@ -6,13 +6,19 @@ from schemas import (
     DialogCreateRespDTO,
 )
 from models import MessageStatus
+from .exceptions import IncorrectData
 
 
 class DialogService:
+    """
+    Сервис выполняет бизнес-логику по работе с диалогами
+    """
+
+    # метод получения диалогов пользователя
     @staticmethod
     async def get_active_user_dialogs(
         uow: AbstractUOW, user_id: int, limit: int, offset: int
-    ) -> List[DialogDTO] | None:
+    ) -> List[DialogDTO]:
         async with uow:
             dialogs = await uow.dialogs.get_active_user_dialogs(user_id, limit, offset)
             dialogs_dto = []
@@ -42,12 +48,13 @@ class DialogService:
     async def hide_dialog(dialog_id: int, user_id):
         raise NotImplementedError
 
+    # метод создания нового диалога (в случае отсутствия)
     @staticmethod
     async def create_dual_dialog(
         uow: AbstractUOW, uid: int, remote_uid: int
-    ) -> DialogCreateRespDTO | None:
+    ) -> DialogCreateRespDTO:
         if uid == remote_uid:
-            return None
+            raise IncorrectData
         async with uow:
             dialog_id = await uow.dialogs.get_dual_dialog_id(uid, remote_uid)
             if dialog_id == -1:  # создаём новый диалог

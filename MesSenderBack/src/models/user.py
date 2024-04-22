@@ -10,6 +10,10 @@ class Role(str, enum.Enum):
 
 
 class User(Base):
+    """
+    Модель таблицы пользователей
+    """
+
     __tablename__ = "user"
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(

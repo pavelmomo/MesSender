@@ -7,11 +7,11 @@ from db.db_pgs import DatabasePgs
 app = FastAPI(
     title="Web Application", debug=True
 )  # создание экземпляра приложения Fastapi
-origins = ["*"]
 
-app.add_middleware(
+
+app.add_middleware(  # разрешение ограничений CORS
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -21,5 +21,5 @@ for router in all_routers:  # добавление всех роутеров
 
 
 @app.on_event("startup")
-async def database_init():
+async def database_init():  # инициализация БД при запуске
     await DatabasePgs.init_db()
