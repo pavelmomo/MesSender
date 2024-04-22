@@ -2,6 +2,14 @@
     "python.languageServer": "Pylance",
     "javascript.preferences.importModuleSpecifier": "project-relative",
     "pylint.cwd": "${workspaceFolder}/src",
+    "pylint.args": [
+        "--disable=pointless-string-statement",
+        "--disable=missing-module-docstring",
+        "--disable=missing-function-docstring",
+        "--disable=missing-class-docstring",
+        "--disable=consider-using-f-string",
+        "--extension-pkg-whitelist=pydantic"
+    ],
     "files.exclude": {
         "**/__pycache__": true
     },
