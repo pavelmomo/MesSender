@@ -1,8 +1,10 @@
 from typing import Sequence
+import sqlalchemy.exc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 from sqlalchemy.orm import contains_eager
 from models import Dialog, User, DialogUser, Message
+from repositories.exceptions import IncorrectData
 from . import AbstractDialogRepository
 
 
@@ -60,19 +62,23 @@ class DialogRepositoryPgs(AbstractDialogRepository):
 
     async def create_dual_dialog(self, user_id: int, remote_user_id: int) -> int:
         new_dialog = Dialog()
-        self.session.add(new_dialog)
-        await self.session.flush()
-        new_dialog_users = [
-            DialogUser(
-                dialog_id=new_dialog.id, user_id=user_id, remote_user_id=remote_user_id
-            ),
-            DialogUser(
-                dialog_id=new_dialog.id, user_id=remote_user_id, remote_user_id=user_id
-            ),
-        ]
-        self.session.add_all(new_dialog_users)
-        await self.session.commit()
-        return new_dialog.id
+        try:
+            self.session.add(new_dialog)
+            await self.session.flush()
+            new_dialog_users = [
+                DialogUser(
+                    dialog_id=new_dialog.id, user_id=user_id, remote_user_id=remote_user_id
+                ),
+                DialogUser(
+                    dialog_id=new_dialog.id, user_id=remote_user_id, remote_user_id=user_id
+                ),
+            ]
+            self.session.add_all(new_dialog_users)
+            await self.session.commit()
+            return new_dialog.id
+        except sqlalchemy.exc.IntegrityError as e:
+            await self.session.rollback()
+            raise IncorrectData from e
 
     async def get_dialog_users(self, dialog_id: int) -> list[int]:
         query = select(DialogUser.user_id).filter(DialogUser.dialog_id == dialog_id)

@@ -1,12 +1,13 @@
 from typing import List
 from repositories import AbstractUOW
+from repositories.exceptions import IncorrectData as IncorrectDataRepo
 from schemas import (
     DialogDTO,
     DialogViewStatus,
     DialogCreateRespDTO,
 )
 from models import MessageStatus
-from .exceptions import IncorrectData
+from .exceptions import IncorrectData as IncorrectDataService
 
 
 class DialogService:
@@ -54,11 +55,14 @@ class DialogService:
         uow: AbstractUOW, uid: int, remote_uid: int
     ) -> DialogCreateRespDTO:
         if uid == remote_uid:
-            raise IncorrectData
-        async with uow:
-            dialog_id = await uow.dialogs.get_dual_dialog_id(uid, remote_uid)
-            if dialog_id == -1:  # создаём новый диалог
-                result = await uow.dialogs.create_dual_dialog(uid, remote_uid)
-                return DialogCreateRespDTO(status="created", dialog_id=result)
-            else:
-                return DialogCreateRespDTO(status="existed", dialog_id=dialog_id)
+            raise IncorrectDataService
+        try:
+            async with uow:
+                dialog_id = await uow.dialogs.get_dual_dialog_id(uid, remote_uid)
+                if dialog_id == -1:  # создаём новый диалог
+                    result = await uow.dialogs.create_dual_dialog(uid, remote_uid)
+                    return DialogCreateRespDTO(status="created", dialog_id=result)
+                else:
+                    return DialogCreateRespDTO(status="existed", dialog_id=dialog_id)
+        except IncorrectDataRepo as e:
+            raise IncorrectDataService from e
