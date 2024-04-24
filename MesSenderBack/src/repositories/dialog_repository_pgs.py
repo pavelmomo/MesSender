@@ -32,7 +32,7 @@ class DialogRepositoryPgs(AbstractDialogRepository):
             select(DialogUser)
             .filter(DialogUser.user_id == user_id)
             .join(Dialog, DialogUser.dialog_id == Dialog.id)
-            .outerjoin(
+            .join(
                 Message, Message.id == subquery
             )  # замена с outerjoin, вывод только диалогов с посл. сообщением
             .outerjoin(User, User.id == DialogUser.remote_user_id)
@@ -60,22 +60,30 @@ class DialogRepositoryPgs(AbstractDialogRepository):
         result = result.scalars().one_or_none()
         return -1 if result is None else result.dialog_id
 
-    async def create_dual_dialog(self, user_id: int, remote_user_id: int) -> int:
+    async def create_dual_dialog(
+        self, user_id: int, remote_user_id: int, first_message: str
+    ) -> tuple[int, Message]:
         new_dialog = Dialog()
         try:
             self.session.add(new_dialog)
             await self.session.flush()
-            new_dialog_users = [
+            new_items = [
                 DialogUser(
-                    dialog_id=new_dialog.id, user_id=user_id, remote_user_id=remote_user_id
+                    dialog_id=new_dialog.id,
+                    user_id=user_id,
+                    remote_user_id=remote_user_id,
                 ),
                 DialogUser(
-                    dialog_id=new_dialog.id, user_id=remote_user_id, remote_user_id=user_id
+                    dialog_id=new_dialog.id,
+                    user_id=remote_user_id,
+                    remote_user_id=user_id,
                 ),
             ]
-            self.session.add_all(new_dialog_users)
+            self.session.add_all(new_items)
+            new_message = Message(text=first_message, dialog_id=new_dialog.id, user_id=user_id)
+            self.session.add(new_message)
             await self.session.commit()
-            return new_dialog.id
+            return new_dialog.id, new_message
         except sqlalchemy.exc.IntegrityError as e:
             await self.session.rollback()
             raise IncorrectData from e

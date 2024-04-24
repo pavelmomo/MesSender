@@ -1,6 +1,8 @@
 from fastapi import WebSocket
 from schemas import PackageDTO
 from repositories import AbstractUOW
+from schemas.message_schemas import MessageDTO
+from schemas.notify_schemas import EventType, SetMessageViewedDTO
 
 
 class NotifyService:
@@ -62,3 +64,20 @@ class NotifyService:
             await MessageService.set_message_viewed(
                 uow, package.data.message_ids, package.data.dialog_id, user_id
             )
+
+    @staticmethod
+    async def notify_about_message(message: MessageDTO, user_ids: list[int]):
+        pack_to_send = PackageDTO(event=EventType.send_message, data=message)
+
+        await NotifyService.send_package(pack_to_send, user_ids)
+
+    @staticmethod
+    async def notify_about_message_status(
+        dialog_id: int, message_ids: list[int], user_ids: list[int]
+    ):
+        pack_to_send = PackageDTO(
+            event=EventType.set_message_viewed,
+            data=SetMessageViewedDTO(dialog_id=dialog_id, message_ids=message_ids),
+        )
+
+        await NotifyService.send_package(pack_to_send, user_ids)

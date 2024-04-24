@@ -26,7 +26,7 @@ export default function Dialog() {
       const mes = await response.json();
       setMessages(mes);
     }
-    if (currentDialog !== null) {
+    if (currentDialog !== null && currentDialog.id !== null) {
       loadMessages();
       messageListContainer.current.scrollTo({
         left: 0,
@@ -44,7 +44,7 @@ export default function Dialog() {
         behavior: "instant",
       });
     }
-  }, [messages]);
+  }, [messages, currentDialog]);
 
   const handleSubmit = useCallback(
     async (e) => {
@@ -52,15 +52,45 @@ export default function Dialog() {
       if (dialogWS == null || e.target.message.value.trim().length === 0) {
         return;
       }
-      dialogWS.send(
-        JSON.stringify({
-          event: "send_message",
-          data: {
-            dialog_id: currentDialog.id,
-            text: e.target.message.value,
+      if (
+        // диалог является новым, на сервере его еще не существует
+        currentDialog.id == null
+      ) {
+        const responseData = await fetch("/api/dialogs/dual", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-        })
-      );
+          body: JSON.stringify({
+            remote_uid: currentDialog.remote_uid,
+            first_message: e.target.message.value,
+          }),
+        }).then(
+          (response) => response.json(),
+          (error) => console.log(error)
+        );
+        const d = currentDialog;
+        d.id = responseData.dialog_id;
+        setCurrentDialog(d);
+        const firstMessage = {
+          id: responseData.first_message_id,
+          text: e.target.message.value,
+          created_at: responseData.created_at,
+          status: "not_viewed",
+        };
+        setMessages([firstMessage]);
+      } else {
+        // обычная отправка сообщения
+        dialogWS.send(
+          JSON.stringify({
+            event: "send_message",
+            data: {
+              dialog_id: currentDialog.id,
+              text: e.target.message.value,
+            },
+          })
+        );
+      }
       e.target.message.value = "";
     },
     [dialogWS, currentDialog]

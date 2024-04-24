@@ -2,7 +2,7 @@ import enum
 from pydantic import BaseModel
 from . import MessageDTO, MessageCreateDTO
 
-class SetMessageViewed(BaseModel):
+class SetMessageViewedDTO(BaseModel):
     message_ids: list[int]
     dialog_id: int
 
@@ -14,5 +14,5 @@ class EventType(str,enum.Enum):
 
 class PackageDTO(BaseModel):
     event: EventType
-    data : MessageDTO | MessageCreateDTO | SetMessageViewed
+    data : MessageDTO | MessageCreateDTO | SetMessageViewedDTO
 

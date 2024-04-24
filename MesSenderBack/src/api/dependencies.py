@@ -1,7 +1,7 @@
 from typing import Annotated
 from fastapi import Depends
 from pydantic import BaseModel, Field
-from models import User
+from schemas import UserDTO
 from repositories import UnitOfWorkPgs, AbstractUOW
 
 
@@ -28,4 +28,4 @@ UOW = Annotated[AbstractUOW, Depends(_get_uow)]
 from api.auth_router import authorize_http_endpoint
 
 # объект, предназначенный для авторизации эндпоинта
-CurrentUser = Annotated[User, Depends(authorize_http_endpoint)]
+CurrentUser = Annotated[UserDTO, Depends(authorize_http_endpoint)]

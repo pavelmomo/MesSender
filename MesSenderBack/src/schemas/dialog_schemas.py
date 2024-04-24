@@ -1,10 +1,8 @@
 import enum
+import datetime
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-class CreateStatus(str, enum.Enum):
-    created = 'created'
-    existed = 'existed'
 
 class DialogViewStatus(str,enum.Enum):
     not_viewed = 'not_viewed',
@@ -20,8 +18,14 @@ class DialogDTO(BaseModel):
 
 
 class DialogCreateRespDTO(BaseModel):
-    status: CreateStatus
-    dialog_id: Optional[int] = None
+    dialog_id: int
+    first_message_id: int
+    created_at: datetime.datetime
 
 class DualDialogCreateReqDTO(BaseModel):
     remote_uid: int
+    first_message: str = Field(min_length=1)
+
+class DialogExistResDTO(BaseModel):
+    is_exist: bool
+    dialog_id: int | None = None

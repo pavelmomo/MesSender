@@ -29,18 +29,27 @@ export default function DialogsTab() {
       () => console.log("Response error!")
     );
     dialogsBuf = dialogsBuf !== null ? dialogsBuf : [];
-    const dialog_id = searchParams.get("dialog_id");
-    if (dialog_id != null) {
-      const dialog_ind = dialogsBuf.findIndex(
-        (e) => e.id === Number(dialog_id)
-      );
+    const dialogId = searchParams.get("exist_dialog_id");
+    if (dialogId != null) {
+      const dialog_ind = dialogsBuf.findIndex((e) => e.id === Number(dialogId));
       if (dialog_ind !== -1) {
         setCurrentDialog(dialogsBuf[dialog_ind]);
       }
+    } else {
+      const dialogName = searchParams.get("dialog_name");
+      const remoteUid = searchParams.get("remote_uid");
+      if (dialogName != null && remoteUid != null) {
+        alert(dialogName);
+        setCurrentDialog({
+          dialog_name: dialogName,
+          remote_uid: remoteUid,
+          id: null,
+        });
+        setSearchParams({});
+      }
     }
-    setSearchParams({});
     setDialogs(dialogsBuf);
-  }, []);
+  }, [searchParams]);
 
   const handleNewMessage = useCallback(
     (e) => {
@@ -53,7 +62,7 @@ export default function DialogsTab() {
         );
 
         if (dialogIndex !== -1) {
-          //проверка на существование диалога
+          //диалог, в котороый пришло собщение, есть в списке диалогов
           const bufDialog = dialogs[dialogIndex];
           bufDialog.last_message = recvPacket.data.text;
 
@@ -81,6 +90,7 @@ export default function DialogsTab() {
               bufDialog.view_status = "not_viewed";
             }
           }
+          //пересортировка диалогов
           const bufDialogs = [...dialogs];
           bufDialogs.splice(dialogIndex, 1);
           bufDialogs.unshift(bufDialog);

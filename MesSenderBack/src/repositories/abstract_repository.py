@@ -22,7 +22,7 @@ class AbstractDialogRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def create_dual_dialog(self, user_id: int, remote_user_id: int) -> int:
+    async def create_dual_dialog(self, user_id: int, remote_user_id: int, first_message: str) -> tuple[int, Message]:
         raise NotImplementedError
 
     @abstractmethod

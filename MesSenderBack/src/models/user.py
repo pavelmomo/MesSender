@@ -19,6 +19,7 @@ class User(Base):
     username: Mapped[str] = mapped_column(
         String(length=20), unique=True, nullable=False
     )
+    is_banned: Mapped[bool] = mapped_column(default=False)
     role: Mapped[Role] = mapped_column(default="user")
     email: Mapped[str] = mapped_column(String(length=30), unique=True, nullable=False)
     password: Mapped[str] = mapped_column()

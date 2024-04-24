@@ -4,13 +4,19 @@ from config import JWT_COOKIE_NAME
 from api.dependencies import UOW
 from schemas import UserCreateDTO, UserLoginDTO, UserDTO
 from services import AuthService
-from services.exceptions import *
+from services.exceptions import (
+    UserAlreadyExist,
+    UserNotExist,
+    InvalidCredentials,
+    TokenExpire,
+    InvalidToken,
+)
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])  # создание роутера
 
 
 # эндпоинт регистрации
-@router.post("/register")
+@router.post("/register", response_model=UserDTO)
 async def register(new_user: UserCreateDTO, uow: UOW):
     try:
         return await AuthService.register(new_user, uow)

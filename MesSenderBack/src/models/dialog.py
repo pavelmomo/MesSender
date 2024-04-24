@@ -1,7 +1,7 @@
 import datetime
 from typing import Optional
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import ForeignKey, text
+from sqlalchemy import ForeignKey
 from . import Base
 
 
@@ -14,7 +14,7 @@ class DialogUser(Base):
     __tablename__ = "dialog_user"
     dialog_id: Mapped[int] = mapped_column(ForeignKey("dialog.id"), primary_key=True)
     border_date: Mapped[datetime.datetime] = mapped_column(
-        server_default=text("TIMEZONE('utc',now())")
+        default=datetime.datetime.utcfromtimestamp(0)
     )
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), primary_key=True)
     remote_user_id: Mapped[Optional[int]] = mapped_column(ForeignKey("user.id"))

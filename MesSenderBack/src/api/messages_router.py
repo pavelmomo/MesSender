@@ -19,10 +19,12 @@ router = APIRouter(prefix="/api", tags=["Messages"])  # создание роу�
 
 # эндпоинт отправки сообщений в диалогв, данный момент не используется
 # по причине перевода отправки сообщений на ws эндпоинт, может быть резервным
-@router.post("/dialogs/{id}/messages", response_model=int)
-async def send_message(id: int, message: MessageCreateDTO, uow: UOW, user: CurrentUser):
+@router.post("/dialogs/{id}/messages")
+async def send_message(
+    dialog_id: int, message: MessageCreateDTO, uow: UOW, user: CurrentUser
+):
     try:
-        message.dialog_id = id
+        message.dialog_id = dialog_id
         message.user_id = user.id
         return await MessageService.send_message(uow, message)
 
@@ -31,13 +33,13 @@ async def send_message(id: int, message: MessageCreateDTO, uow: UOW, user: Curre
 
 
 # эндпоинт получения сообщений из диалога
-@router.get("/dialogs/{id}/messages", response_model=list[MessageDTO])
+@router.get("/dialogs/{dialog_id}/messages", response_model=list[MessageDTO])
 async def get_messages(
-    id: int, user: CurrentUser, uow: UOW, paginator: Paginator = Depends()
+    dialog_id: int, user: CurrentUser, uow: UOW, paginator: Paginator = Depends()
 ):
     try:
         return await MessageService.get_dialog_messages(
-            uow, id, user.id, paginator.limit, paginator.offset
+            uow, dialog_id, user.id, paginator.limit, paginator.offset
         )
     except AccessDenied as e:
         raise HTTPException(status_code=403, detail="Access denied") from e
@@ -52,7 +54,7 @@ async def websocket_endpoint(
     user: Annotated[UserDTO, Depends(authorize_ws_endpoint)],
 ):
     if user is None:
-        await websocket.close(code=401)
+        await websocket.close(code=1008)
         return
     user_id = user.id
     try:

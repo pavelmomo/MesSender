@@ -16,7 +16,7 @@ export const UserCard = memo(({ cardUser, createDialog }) => {
       {cardUser.id !== user.id && (
         <button
           className={styles.iconContainer}
-          onClick={() => createDialog(cardUser.id)}
+          onClick={() => createDialog(cardUser.id, cardUser.username)}
         >
           <EmailSharp />
         </button>

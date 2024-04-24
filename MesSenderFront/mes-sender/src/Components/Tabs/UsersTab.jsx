@@ -8,23 +8,33 @@ export default function UsersTab() {
   const [users, setUsers] = useState([]);
   const navigate = useNavigate();
 
-  const createDialog = useCallback(async (remote_uid) => {
-    const dialogStatus = await fetch("/api/dialogs/dual", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        remote_uid: remote_uid,
-      }),
-    }).then(
+  const createDialog = useCallback(async (remote_uid, remote_username) => {
+    const dialogStatus = await fetch(
+      "/api/dialogs/dual/check?" +
+        new URLSearchParams({
+          remote_uid: remote_uid,
+        }),
+      {
+        method: "POST",
+      }
+    ).then(
       (response) => response.json(),
       (error) => console.log(error)
     );
     if (dialogStatus === null) {
       return;
     }
-    navigate(`/dialogs?dialog_id=${dialogStatus.dialog_id}`);
+    if (dialogStatus.is_exist) {
+      navigate(`/dialogs?exist_dialog_id=${dialogStatus.dialog_id}`);
+    } else {
+      navigate(
+        `/dialogs?` +
+          new URLSearchParams({
+            dialog_name: remote_username,
+            remote_uid: remote_uid,
+          })
+      );
+    }
   }, []);
 
   const handleSubmit = useCallback((e) => {

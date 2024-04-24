@@ -2,11 +2,15 @@ from typing import List
 from repositories import AbstractUOW
 from repositories.exceptions import IncorrectData as IncorrectDataRepo
 from schemas import (
+    MessageDTO,
     DialogDTO,
     DialogViewStatus,
     DialogCreateRespDTO,
+    DialogExistResDTO,
+    DualDialogCreateReqDTO,
 )
 from models import MessageStatus
+from . import NotifyService
 from .exceptions import IncorrectData as IncorrectDataService
 
 
@@ -49,20 +53,45 @@ class DialogService:
     async def hide_dialog(dialog_id: int, user_id):
         raise NotImplementedError
 
-    # метод создания нового диалога (в случае отсутствия)
+    # метод создания нового диалога и отправки первого сообщения в диалог
     @staticmethod
     async def create_dual_dialog(
-        uow: AbstractUOW, uid: int, remote_uid: int
+        uow: AbstractUOW, uid: int, create_dto: DualDialogCreateReqDTO
     ) -> DialogCreateRespDTO:
-        if uid == remote_uid:
+        if uid == create_dto.remote_uid:
             raise IncorrectDataService
         try:
             async with uow:
-                dialog_id = await uow.dialogs.get_dual_dialog_id(uid, remote_uid)
-                if dialog_id == -1:  # создаём новый диалог
-                    result = await uow.dialogs.create_dual_dialog(uid, remote_uid)
-                    return DialogCreateRespDTO(status="created", dialog_id=result)
-                else:
-                    return DialogCreateRespDTO(status="existed", dialog_id=dialog_id)
+                dialog_id = await uow.dialogs.get_dual_dialog_id(
+                    uid, create_dto.remote_uid
+                )
+                if dialog_id != -1:
+                    raise IncorrectDataService
+                new_dialog_id, first_message = await uow.dialogs.create_dual_dialog(
+                    uid, create_dto.remote_uid, create_dto.first_message
+                )
+                message_dto = MessageDTO.model_validate(
+                    first_message, from_attributes=True
+                )
+                await NotifyService.notify_about_message(
+                    message_dto, [uid, create_dto.remote_uid]
+                )
+                return DialogCreateRespDTO(
+                    dialog_id=new_dialog_id,
+                    first_message_id=first_message.id,
+                    created_at=first_message.created_at,
+                )
+
         except IncorrectDataRepo as e:
             raise IncorrectDataService from e
+
+    # метод проверки наличия диалога между пользователями
+    @staticmethod
+    async def check_dual_dialogs_existing(
+        uid: int, remote_uid, uow: AbstractUOW
+    ) -> DialogExistResDTO:
+        async with uow:
+            dialog_id = await uow.dialogs.get_dual_dialog_id(uid, remote_uid)
+            if dialog_id != -1:
+                return DialogExistResDTO(is_exist=True, dialog_id=dialog_id)
+            return DialogExistResDTO(is_exist=False)

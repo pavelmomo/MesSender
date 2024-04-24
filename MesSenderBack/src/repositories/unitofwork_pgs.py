@@ -1,8 +1,5 @@
 from db.db_pgs import DatabasePgs
-from . import (AbstractUOW,
-               MessageRepositoryPgs,
-               UserRepositoryPgs,
-               DialogRepositoryPgs)
+from . import AbstractUOW, MessageRepositoryPgs, UserRepositoryPgs, DialogRepositoryPgs
 
 
 class UnitOfWorkPgs(AbstractUOW):
@@ -15,10 +12,9 @@ class UnitOfWorkPgs(AbstractUOW):
         self.users = UserRepositoryPgs(self.session)
         self.messages = MessageRepositoryPgs(self.session)
         self.dialogs = DialogRepositoryPgs(self.session)
+
     async def __aexit__(self, *args):
         await self.session.close()
-
-
 
     async def commit(self):
         await self.session.commit()

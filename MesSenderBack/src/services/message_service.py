@@ -3,9 +3,6 @@ from models import Message
 from schemas import (
     MessageCreateDTO,
     MessageDTO,
-    PackageDTO,
-    EventType,
-    SetMessageViewed,
 )
 from services.exceptions import AccessDenied
 from . import NotifyService
@@ -27,13 +24,11 @@ class MessageService:
             if message_to_send.user_id not in user_ids_list:
                 raise AccessDenied
             message_id = await uow.messages.send_message(message_to_send)
-
-            pack_to_send = PackageDTO(
-                event=EventType.send_message,
-                data=MessageDTO.model_validate(message_to_send, from_attributes=True),
+            message_dto = MessageDTO.model_validate(
+                message_to_send, from_attributes=True
             )
 
-            await NotifyService.send_package(pack_to_send, user_ids_list)
+            await NotifyService.notify_about_message(message_dto, user_ids_list)
             return message_id
 
     # метод получения сообщений диалога
@@ -43,22 +38,19 @@ class MessageService:
     ) -> list[MessageDTO]:
         async with uow:
 
-            user_ids_list = await uow.dialogs.get_dialog_users(dialog_id)
-            if user_id not in user_ids_list:
+            user_ids = await uow.dialogs.get_dialog_users(dialog_id)
+            if user_id not in user_ids:
                 raise AccessDenied
 
             messages, changed_status_msg_ids = await uow.messages.get_messages(
                 dialog_id, user_id, limit, offset
             )
             if len(changed_status_msg_ids) > 0:
-                user_ids_list.remove(user_id)
-                pack_to_send = PackageDTO(
-                    event=EventType.set_message_viewed,
-                    data=SetMessageViewed(
-                        dialog_id=dialog_id, message_ids=changed_status_msg_ids
-                    ),
+                user_ids.remove(user_id)
+                await NotifyService.notify_about_message_status(
+                    dialog_id, changed_status_msg_ids, user_ids
                 )
-                await NotifyService.send_package(pack_to_send, user_ids_list)
+
             messages_dto = [
                 MessageDTO.model_validate(m, from_attributes=True)
                 for m in messages[::-1]
@@ -68,15 +60,13 @@ class MessageService:
     # метод изменения статуса прочтения сообщения
     @staticmethod
     async def set_message_viewed(
-        uow: AbstractUOW, ids: list[int], dialog_id: int, user_id: int
+        uow: AbstractUOW, message_ids: list[int], dialog_id: int, user_id: int
     ):
         async with uow:
-            user_ids_list = await uow.dialogs.get_dialog_users(dialog_id)
-            if user_id not in user_ids_list:
+            user_ids = await uow.dialogs.get_dialog_users(dialog_id)
+            if user_id not in user_ids:
                 raise AccessDenied
-            await uow.messages.set_viewed_status(ids, dialog_id)
-            pack_to_send = PackageDTO(
-                event=EventType.set_message_viewed,
-                data=SetMessageViewed(dialog_id=dialog_id, message_ids=ids),
+            await uow.messages.set_viewed_status(message_ids, dialog_id)
+            await NotifyService.notify_about_message_status(
+                dialog_id, message_ids, user_ids
             )
-            await NotifyService.send_package(pack_to_send, user_ids_list)
