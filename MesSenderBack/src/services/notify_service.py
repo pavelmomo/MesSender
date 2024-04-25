@@ -1,4 +1,4 @@
-from fastapi import WebSocket
+from fastapi import WebSocket, WebSocketDisconnect
 from schemas import PackageDTO
 from repositories import AbstractUOW
 from schemas.message_schemas import MessageDTO
@@ -48,7 +48,11 @@ class NotifyService:
                 joined_ids.append(i)
         for id in joined_ids:
             for i in NotifyService.connections[id]:
-                await i.send_json(package.json())
+                try:
+                    await i.send_json(package.json())
+                except WebSocketDisconnect:
+                    NotifyService.unregister(i, id)
+
 
     # метод обработки пакетов пользователя по Websocket
     @staticmethod
@@ -68,7 +72,6 @@ class NotifyService:
     @staticmethod
     async def notify_about_message(message: MessageDTO, user_ids: list[int]):
         pack_to_send = PackageDTO(event=EventType.send_message, data=message)
-
         await NotifyService.send_package(pack_to_send, user_ids)
 
     @staticmethod

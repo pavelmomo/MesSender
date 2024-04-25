@@ -2,7 +2,6 @@ from typing import List
 from repositories import AbstractUOW
 from repositories.exceptions import IncorrectData as IncorrectDataRepo
 from schemas import (
-    MessageDTO,
     DialogDTO,
     DialogViewStatus,
     DialogCreateRespDTO,
@@ -10,7 +9,6 @@ from schemas import (
     DualDialogCreateReqDTO,
 )
 from models import MessageStatus
-from . import NotifyService
 from .exceptions import IncorrectData as IncorrectDataService
 
 
@@ -35,14 +33,11 @@ class DialogService:
                     ),
                     "view_status": (
                         DialogViewStatus.viewed
-                        if len(d.dialog.messages) == 0
-                        or d.dialog.messages[0].user_id == user_id
+                        if d.dialog.messages[0].user_id == user_id
                         or d.dialog.messages[0].status == MessageStatus.viewed
                         else DialogViewStatus.not_viewed
                     ),
-                    "last_message": (
-                        "" if len(d.dialog.messages) == 0 else d.dialog.messages[0].text
-                    ),
+                    "last_message": d.dialog.messages[0].text,
                     "remote_uid": None if d.remote_user is None else d.remote_user.id,
                 }
                 dialogs_dto.append(DialogDTO.model_validate(dialog_dict))
@@ -67,20 +62,10 @@ class DialogService:
                 )
                 if dialog_id != -1:
                     raise IncorrectDataService
-                new_dialog_id, first_message = await uow.dialogs.create_dual_dialog(
-                    uid, create_dto.remote_uid, create_dto.first_message
+                new_dialog_id = await uow.dialogs.create_dual_dialog(
+                    uid, create_dto.remote_uid
                 )
-                message_dto = MessageDTO.model_validate(
-                    first_message, from_attributes=True
-                )
-                await NotifyService.notify_about_message(
-                    message_dto, [uid, create_dto.remote_uid]
-                )
-                return DialogCreateRespDTO(
-                    dialog_id=new_dialog_id,
-                    first_message_id=first_message.id,
-                    created_at=first_message.created_at,
-                )
+                return DialogCreateRespDTO(dialog_id=new_dialog_id)
 
         except IncorrectDataRepo as e:
             raise IncorrectDataService from e

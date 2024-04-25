@@ -26,7 +26,11 @@ export default function Dialog() {
       const mes = await response.json();
       setMessages(mes);
     }
-    if (currentDialog !== null && currentDialog.id !== null) {
+    if (
+      currentDialog !== null &&
+      currentDialog.id !== null &&
+      !currentDialog.hasOwnProperty("no_need_load")
+    ) {
       loadMessages();
       messageListContainer.current.scrollTo({
         left: 0,
@@ -63,22 +67,28 @@ export default function Dialog() {
           },
           body: JSON.stringify({
             remote_uid: currentDialog.remote_uid,
-            first_message: e.target.message.value,
           }),
         }).then(
           (response) => response.json(),
           (error) => console.log(error)
         );
-        const d = currentDialog;
-        d.id = responseData.dialog_id;
-        setCurrentDialog(d);
-        const firstMessage = {
-          id: responseData.first_message_id,
-          text: e.target.message.value,
-          created_at: responseData.created_at,
-          status: "not_viewed",
-        };
-        setMessages([firstMessage]);
+        // создан новый диалог на сервере, устанавливаем id
+        setCurrentDialog((prev) => {
+          return {
+            id: responseData.dialog_id,
+            dialog_name: prev.dialog_name,
+            no_need_load: true,
+          };
+        });
+        dialogWS.send(
+          JSON.stringify({
+            event: "send_message",
+            data: {
+              dialog_id: responseData.dialog_id,
+              text: e.target.message.value,
+            },
+          })
+        );
       } else {
         // обычная отправка сообщения
         dialogWS.send(

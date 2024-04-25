@@ -25,7 +25,13 @@ export default function UsersTab() {
       return;
     }
     if (dialogStatus.is_exist) {
-      navigate(`/dialogs?exist_dialog_id=${dialogStatus.dialog_id}`);
+      navigate(
+        `/dialogs?` +
+          new URLSearchParams({
+            exist_dialog_id: dialogStatus.dialog_id,
+            dialog_name: remote_username,
+          })
+      );
     } else {
       navigate(
         `/dialogs?` +

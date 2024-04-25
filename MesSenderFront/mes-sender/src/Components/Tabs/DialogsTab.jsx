@@ -28,65 +28,69 @@ export default function DialogsTab() {
       (response) => response.json(),
       () => console.log("Response error!")
     );
-    dialogsBuf = dialogsBuf !== null ? dialogsBuf : [];
-    const dialogId = searchParams.get("exist_dialog_id");
-    if (dialogId != null) {
-      const dialog_ind = dialogsBuf.findIndex((e) => e.id === Number(dialogId));
-      if (dialog_ind !== -1) {
-        setCurrentDialog(dialogsBuf[dialog_ind]);
+    const dialogName = searchParams.get("dialog_name");
+    if (dialogName !== null) {
+      // была переадресация со страницы поиска пользователей
+      const dialogId = searchParams.get("exist_dialog_id");
+      if (dialogId !== null) {
+        // переадресация на существующий диалог
+        setCurrentDialog({ id: Number(dialogId), dialog_name: dialogName });
+      } else {
+        // диалог еще не существует
+        const remoteUid = searchParams.get("remote_uid");
+        if (remoteUid !== null) {
+          setCurrentDialog({
+            dialog_name: dialogName,
+            remote_uid: Number(remoteUid),
+            id: null,
+          });
+        }
       }
-    } else {
-      const dialogName = searchParams.get("dialog_name");
-      const remoteUid = searchParams.get("remote_uid");
-      if (dialogName != null && remoteUid != null) {
-        alert(dialogName);
-        setCurrentDialog({
-          dialog_name: dialogName,
-          remote_uid: remoteUid,
-          id: null,
-        });
-        setSearchParams({});
-      }
+
+      setSearchParams({});
     }
+
     setDialogs(dialogsBuf);
-  }, [searchParams]);
+  }, [searchParams, setSearchParams, setCurrentDialog]);
 
   const handleNewMessage = useCallback(
     (e) => {
       const recvPacket = JSON.parse(JSON.parse(e.data));
-
       if (recvPacket.event === "send_message") {
         //получено новое сообщение
+        if (
+          currentDialog !== null &&
+          currentDialog.id === recvPacket.data.dialog_id
+        ) {
+          //открыт диалог с пользователем, приславшим сообщение
+          setMessages((prev) => [...prev, recvPacket.data]);
+          //высылаем для сообщения статус - прочтено
+          if (recvPacket.data.user_id !== user.id) {
+            dialogWS.send(
+              JSON.stringify({
+                event: "set_message_viewed",
+                data: {
+                  message_ids: [recvPacket.data.id],
+                  dialog_id: recvPacket.data.dialog_id,
+                },
+              })
+            );
+          }
+        }
         const dialogIndex = dialogs.findIndex(
           (item) => item.id === recvPacket.data.dialog_id
         );
 
+        //диалог, в котороый пришло собщение, есть в списке диалогов
         if (dialogIndex !== -1) {
-          //диалог, в котороый пришло собщение, есть в списке диалогов
           const bufDialog = dialogs[dialogIndex];
           bufDialog.last_message = recvPacket.data.text;
-
-          if (
-            currentDialog !== null &&
-            currentDialog.id === recvPacket.data.dialog_id
-          ) {
-            //открыт диалог с пользователем, приславшим сообщение
-            setMessages((prev) => [...prev, recvPacket.data]);
-            //высылаем для сообщения статус - прочтено
-            if (recvPacket.data.user_id !== user.id) {
-              dialogWS.send(
-                JSON.stringify({
-                  event: "set_message_viewed",
-                  data: {
-                    message_ids: [recvPacket.data.id],
-                    dialog_id: recvPacket.data.dialog_id,
-                  },
-                })
-              );
-            }
-          } else {
-            //диалог с пользователем не открыт
-            if (recvPacket.data.user_id !== user.id) {
+          // смена статуса диалога (смена иконки)
+          if (recvPacket.data.user_id !== user.id) {
+            // открыт диалог, в который пришло сообщение - не меняем статус
+            if (currentDialog !== null && currentDialog.id === bufDialog.id) {
+              bufDialog.view_status = "viewed";
+            } else {
               bufDialog.view_status = "not_viewed";
             }
           }
@@ -127,7 +131,7 @@ export default function DialogsTab() {
     const ws = new WebSocket(`${wsUri}/api/messages/ws`);
     setDialogWS(ws);
     return () => ws.close();
-  }, [loadDialogs]);
+  }, []);
 
   useEffect(() => {
     if (dialogWS !== null) {
