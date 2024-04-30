@@ -2,6 +2,8 @@ import time
 import jwt
 from passlib.context import CryptContext
 from repositories import AbstractUOW
+from db.exceptions import IncorrectData as IncorrectDataRepo
+from services.exceptions import IncorrectData as IncorrectDataService
 from config import JWT_SECRET, JWT_EXPIRATION_TIME, JWT_ALGORITHM
 from models import User
 from schemas import UserCreateDTO, UserDTO, UserLoginDTO, UserUpdateDTO
@@ -11,7 +13,7 @@ from .exceptions import (
     InvalidCredentials,
     InvalidToken,
     TokenExpire,
-    UserIsBanned
+    UserIsBanned,
 )
 from . import UserService
 
@@ -47,17 +49,17 @@ class AuthService:
         if db_user is None:
             raise UserNotExist
         if db_user.is_banned:
-                raise UserIsBanned
+            raise UserIsBanned
         pass_verify = AuthService.crypto_context.verify(user.password, db_user.password)
         if not pass_verify:
             raise InvalidCredentials
-        token = AuthService.create_jwt_token(db_user.id)
+        token = AuthService._create_jwt_token(db_user.id)
         return token
 
     # метод авторизации пользователя
     @staticmethod
     async def authorize(token: str, uow: AbstractUOW):
-        decoded_token = AuthService.verify_jwt_token(token)
+        decoded_token = AuthService._verify_jwt_token(token)
         if (
             decoded_token is None
             or "sub" not in decoded_token
@@ -79,30 +81,33 @@ class AuthService:
     # метод обновления данных аккаунта
     @staticmethod
     async def update_user(update: UserUpdateDTO, user_id: str, uow: AbstractUOW):
-        async with uow:
-            db_user = await uow.users.get_by_id(user_id)
-            updated_user = {"id": db_user.id}
-            if db_user.username != update.username or db_user.email != update.email:
-                check = await uow.users.get_by_username_or_email(
-                    update.username, update.email
+        try:
+            async with uow:
+                db_user = await uow.users.get_by_id(user_id)
+                updated_user = {"id": db_user.id}
+                if db_user.username != update.username or db_user.email != update.email:
+                    check = await uow.users.get_by_username_or_email(
+                        update.username, update.email
+                    )
+                    if check is not None and check.id != user_id:
+                        raise UserAlreadyExist
+                    updated_user["email"] = update.email
+                    updated_user["username"] = update.username
+                pass_verify = AuthService.crypto_context.verify(
+                    update.password, db_user.password
                 )
-                if check is not None and check.id != user_id:
-                    raise UserAlreadyExist()
-                updated_user["email"] = update.email
-                updated_user["username"] = update.username
-            pass_verify = AuthService.crypto_context.verify(
-                update.password, db_user.password
-            )
-            if not pass_verify:
-                raise InvalidCredentials
-            if update.new_password != "":
-                new_pass = AuthService.crypto_context.hash(update.new_password)
-                updated_user["password"] = new_pass
-            await uow.users.update_user(updated_user)
+                if not pass_verify:
+                    raise InvalidCredentials
+                if update.new_password != "":
+                    new_pass = AuthService.crypto_context.hash(update.new_password)
+                    updated_user["password"] = new_pass
+                await uow.users.update_user(updated_user)
+        except IncorrectDataRepo as e:
+            raise IncorrectDataService from e
 
     # метод создания jwt токена
     @staticmethod
-    def create_jwt_token(user_id: int):
+    def _create_jwt_token(user_id: int):
         expiration_date = int(time.time()) + JWT_EXPIRATION_TIME
         token_payload = {"sub": user_id, "exp": expiration_date}
         token = jwt.encode(token_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
@@ -110,7 +115,7 @@ class AuthService:
 
     # метод проверки jwt токена
     @staticmethod
-    def verify_jwt_token(token: str):
+    def _verify_jwt_token(token: str):
         try:
             decoded_data = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
             return decoded_data

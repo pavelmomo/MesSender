@@ -46,7 +46,7 @@ export default function UsersTab() {
   const handleSubmit = useCallback((e) => {
     e.preventDefault();
     fetch(
-      "/api/users/all?" +
+      "/api/users/search?" +
         new URLSearchParams({
           username: e.target.username.value,
         })

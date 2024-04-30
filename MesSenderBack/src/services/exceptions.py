@@ -32,3 +32,6 @@ class AccessDenied(Exception):
 
 class UserIsBanned(Exception):
     pass
+
+class OperationNotPermitted(Exception):
+    pass

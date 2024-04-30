@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 from sqlalchemy.orm import contains_eager
 from models import Dialog, User, DialogUser, Message
-from repositories.exceptions import IncorrectData
+from db.exceptions import IncorrectData
 from . import AbstractDialogRepository
 
 

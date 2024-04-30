@@ -7,6 +7,7 @@ class AbstractDialogRepository(ABC):
     """
     Репозиторий для сущности Dialog и DialogUser
     """
+
     @abstractmethod
     def __init__(self):
         raise NotImplementedError
@@ -34,6 +35,7 @@ class AbstractUserRepository(ABC):
     """
     Репозиторий для сущности User
     """
+
     @abstractmethod
     def __init__(self):
         raise NotImplementedError
@@ -51,7 +53,7 @@ class AbstractUserRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_by_partly_username(self, username: str) -> list[User]:
+    async def get_active_by_partly_username(self, username: str) -> list[User]:
         raise NotImplementedError
 
     @abstractmethod
@@ -59,11 +61,15 @@ class AbstractUserRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def update_user(self, update_dict: dict) ->  None:
+    async def update_user(self, update_dict: dict) -> None:
         raise NotImplementedError
 
     @abstractmethod
     async def create_user(self, user: User) -> User:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_all(self, limit: int, offset: int) -> list[User]:
         raise NotImplementedError
 
 
@@ -71,6 +77,7 @@ class AbstractMessageRepository(ABC):
     """
     Репозиторий для сущности Меssage
     """
+
     @abstractmethod
     def __init__(self):
         raise NotImplementedError
@@ -94,6 +101,7 @@ class AbstractUOW(ABC):
     """
     Определение интерфейса для паттерна Unit Of Work
     """
+
     users: AbstractUserRepository
     messages: AbstractMessageRepository
     dialogs: AbstractDialogRepository

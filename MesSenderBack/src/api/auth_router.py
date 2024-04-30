@@ -36,7 +36,7 @@ async def register(new_user: UserCreateDTO, uow: UOW):
             result_user.id,
             result_user.username,
         )
-        return
+        return result_user
     except UserAlreadyExist as e:
         logger.info(
             "Registration rejected: User with the same cridentials (username=%s,email=%s) already exist",

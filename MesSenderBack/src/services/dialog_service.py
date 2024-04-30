@@ -1,6 +1,6 @@
 from typing import List
 from repositories import AbstractUOW
-from repositories.exceptions import IncorrectData as IncorrectDataRepo
+from db.exceptions import IncorrectData as IncorrectDataRepo
 from schemas import (
     DialogDTO,
     DialogViewStatus,

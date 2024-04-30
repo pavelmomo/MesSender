@@ -7,6 +7,7 @@ class UserDTO(BaseModel):
     username: str = Field(max_length=20)
     email: EmailStr
     role: Role
+    is_banned: bool
 
 
 class UserUpdateDTO(BaseModel):

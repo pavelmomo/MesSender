@@ -3,3 +3,6 @@ class DbError(Exception):
 
 class DbConnectionError(DbError):
     pass
+
+class IncorrectData(Exception):
+    pass

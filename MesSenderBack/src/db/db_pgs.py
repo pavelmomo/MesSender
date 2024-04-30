@@ -45,7 +45,6 @@ class DatabasePgs:
                 insert(User),
                 [
                     {
-                        "id": 1,
                         "username": "admin",
                         "email": "admin@example.com",
                         "password": ADMIN_PASS,
