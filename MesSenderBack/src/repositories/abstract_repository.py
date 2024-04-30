@@ -103,17 +103,17 @@ class AbstractUOW(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def __aenter__(self):
+    async def __aenter__(self):
         raise NotImplementedError
 
     @abstractmethod
-    def __aexit__(self, *args):
+    async def __aexit__(self, *args):
         raise NotImplementedError
 
     @abstractmethod
-    def commit(self):
+    async def commit(self):
         raise NotImplementedError
 
     @abstractmethod
-    def rollback(self):
+    async def rollback(self):
         raise NotImplementedError

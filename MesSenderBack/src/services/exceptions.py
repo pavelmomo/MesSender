@@ -29,3 +29,6 @@ class TokenExpire(Exception):
 
 class AccessDenied(Exception):
     pass
+
+class UserIsBanned(Exception):
+    pass

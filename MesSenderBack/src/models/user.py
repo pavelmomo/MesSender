@@ -5,8 +5,8 @@ from . import Base
 
 
 class Role(str, enum.Enum):
-    user = ("user",)
-    moderator = "moderator"
+    user = "user",
+    admin = "admin"
 
 
 class User(Base):

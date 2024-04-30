@@ -11,6 +11,7 @@ from .exceptions import (
     InvalidCredentials,
     InvalidToken,
     TokenExpire,
+    UserIsBanned
 )
 from . import UserService
 
@@ -45,6 +46,8 @@ class AuthService:
         db_user = await UserService.get_user_by_username(user.username, uow)
         if db_user is None:
             raise UserNotExist
+        if db_user.is_banned:
+                raise UserIsBanned
         pass_verify = AuthService.crypto_context.verify(user.password, db_user.password)
         if not pass_verify:
             raise InvalidCredentials
@@ -69,6 +72,8 @@ class AuthService:
             user = await uow.users.get_by_id(user_id)
             if user is None:
                 raise UserNotExist
+            if user.is_banned:
+                raise UserIsBanned
             return UserDTO.model_validate(user, from_attributes=True)
 
     # метод обновления данных аккаунта

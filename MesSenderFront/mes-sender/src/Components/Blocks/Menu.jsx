@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 
 import HailTwoToneIcon from "@mui/icons-material/HailTwoTone";
 import AccountCircleTwoToneIcon from "@mui/icons-material/AccountCircleTwoTone";
@@ -13,11 +13,11 @@ const userMenuList = [
   [<HailTwoToneIcon />, "Люди", "users", 2],
   [<AccountCircleTwoToneIcon />, "Профиль", "profile", 3],
 ];
-const moderatorMenuList = [
+const adminMenuList = [
   ...userMenuList,
-  [<HailTwoToneIcon />, "Жалобы", "hhh", 4],
+  [<HailTwoToneIcon />, "Администрирование", "hhh", 4],
 ];
-const menuVariants = { user: userMenuList, moderator: moderatorMenuList };
+const menuVariants = { user: userMenuList, admin: adminMenuList };
 
 export default function Menu() {
   const { logout, user } = useContext(AuthContext);

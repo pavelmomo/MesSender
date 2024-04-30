@@ -40,7 +40,7 @@ export default function ProfileTab() {
           e.target.password.value = "";
           setRowsDisabled(true);
           break;
-        case 401:
+        case 400:
           e.target.password.value = "";
           showModal("Введен неверный пароль");
           break;
@@ -84,7 +84,7 @@ export default function ProfileTab() {
         <div className={styles.profileRow}>
           <p style={{ flex: 1 }}>Ваша роль:</p>
           <p style={{ flex: 1 }}>
-            {user.role === "moderator" ? "Модератор" : "Пользователь"}
+            {user.role === "admin" ? "Администратор" : "Пользователь"}
           </p>
         </div>
         <div className={styles.profileRow}>

@@ -1,4 +1,6 @@
+from sqlalchemy.exc import InterfaceError
 from db.db_pgs import DatabasePgs
+from db.exceptions import DbConnectionError
 from . import AbstractUOW, MessageRepositoryPgs, UserRepositoryPgs, DialogRepositoryPgs
 
 
@@ -13,8 +15,15 @@ class UnitOfWorkPgs(AbstractUOW):
         self.messages = MessageRepositoryPgs(self.session)
         self.dialogs = DialogRepositoryPgs(self.session)
 
-    async def __aexit__(self, *args):
+    async def __aexit__(self, exc_type, exc, tb):
         await self.session.close()
+        if (
+            exc_type is OSError
+            or exc_type is ConnectionError
+            or exc_type is InterfaceError
+            or exc_type is ConnectionRefusedError
+        ):
+            raise DbConnectionError from exc
 
     async def commit(self):
         await self.session.commit()

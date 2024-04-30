@@ -1,8 +1,10 @@
+from logging import getLogger
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, WebSocket
+from fastapi import APIRouter, Depends, HTTPException, WebSocket, status
 
 from starlette.websockets import WebSocketDisconnect
-from api.dependencies import UOW, CurrentUser, Paginator
+from api.auth_router import CurrentUser
+from api.dependencies import UOW, Paginator
 from api.auth_router import authorize_ws_endpoint
 from schemas import (
     MessageCreateDTO,
@@ -13,7 +15,7 @@ from schemas import (
 from services import MessageService, NotifyService
 from services.exceptions import AccessDenied
 
-
+logger = getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["Messages"])  # создание роутера
 
 
@@ -29,7 +31,14 @@ async def send_message(
         return await MessageService.send_message(uow, message)
 
     except AccessDenied as e:
-        raise HTTPException(status_code=403, detail="Access denied") from e
+        logger.warning(
+            "Message send operation rejected: Access denied (user_id=%s,dialog_id=%s)",
+            user.id,
+            dialog_id,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Access denied"
+        ) from e
 
 
 # эндпоинт получения сообщений из диалога
@@ -42,7 +51,14 @@ async def get_messages(
             uow, dialog_id, user.id, paginator.limit, paginator.offset
         )
     except AccessDenied as e:
-        raise HTTPException(status_code=403, detail="Access denied") from e
+        logger.warning(
+            "Get messages operation rejected: Access denied (user_id=%s,dialog_id=%s)",
+            user.id,
+            dialog_id,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Access denied"
+        ) from e
 
 
 # эндпоинт Websocket, используется для отправки сообщений, а также для оповещения
@@ -54,11 +70,13 @@ async def websocket_endpoint(
     user: Annotated[UserDTO, Depends(authorize_ws_endpoint)],
 ):
     if user is None:
-        await websocket.close(code=1008)
         return
     user_id = user.id
     try:
         await NotifyService.register(websocket, user_id)
+        logger.info(
+            "WS messages endpoint: User (username=%s) successfully connected", user.username
+        )
         while True:
             data = await websocket.receive_json()
             await NotifyService.handle_user_package(
@@ -66,12 +84,17 @@ async def websocket_endpoint(
             )
 
     except AccessDenied:
+        logger.warning(
+            "WS messages endpoint: Access for User (id=%s) denied, disconnect... ", user.id
+        )
         NotifyService.unregister(websocket, user_id)
-        await websocket.close(code=403)
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
 
     except WebSocketDisconnect:
+        logger.info("WS messages endpoint: User (username=%s) disconnect", user.username)
         NotifyService.unregister(websocket, user_id)
 
     except Exception as e:
         NotifyService.unregister(websocket, user_id)
+        await websocket.close(code=status.WS_1011_INTERNAL_ERROR)
         raise e

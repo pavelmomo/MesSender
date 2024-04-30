@@ -1,5 +1,14 @@
-from fastapi import HTTPException, Response, Request, WebSocket
-from fastapi import APIRouter
+from logging import getLogger
+from typing import Annotated
+from fastapi import (
+    Depends,
+    HTTPException,
+    Response,
+    Request,
+    WebSocket,
+    APIRouter,
+    status,
+)
 from config import JWT_COOKIE_NAME
 from api.dependencies import UOW
 from schemas import UserCreateDTO, UserLoginDTO, UserDTO
@@ -10,8 +19,10 @@ from services.exceptions import (
     InvalidCredentials,
     TokenExpire,
     InvalidToken,
+    UserIsBanned,
 )
 
+logger = getLogger(__name__)
 router = APIRouter(prefix="/api/auth", tags=["Auth"])  # создание роутера
 
 
@@ -19,9 +30,22 @@ router = APIRouter(prefix="/api/auth", tags=["Auth"])  # создание роу
 @router.post("/register", response_model=UserDTO)
 async def register(new_user: UserCreateDTO, uow: UOW):
     try:
-        return await AuthService.register(new_user, uow)
+        result_user = await AuthService.register(new_user, uow)
+        logger.info(
+            "User (id=%s,username=%s) has successfully registered",
+            result_user.id,
+            result_user.username,
+        )
+        return
     except UserAlreadyExist as e:
-        raise HTTPException(status_code=409, detail="User alrady exist") from e
+        logger.info(
+            "Registration rejected: User with the same cridentials (username=%s,email=%s) already exist",
+            new_user.username,
+            new_user.email,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="User already exist"
+        ) from e
 
 
 # эндпоинт входа в аккаунт
@@ -29,46 +53,99 @@ async def register(new_user: UserCreateDTO, uow: UOW):
 async def login(user: UserLoginDTO, uow: UOW, response: Response):
     try:
         token = await AuthService.login(user, uow)
+        logger.info("User (username=%s) has successfully logged in", user.username)
         response.set_cookie(key=JWT_COOKIE_NAME, value=token)
-        response.status_code = 204
+        response.status_code = status.HTTP_204_NO_CONTENT
         return response
 
     except (UserNotExist, InvalidCredentials) as e:
-        raise HTTPException(status_code=401, detail="Invalid credentials") from e
+        logger.info(
+            "Login operation rejected: Invalid cridentials (username=%s)", user.username
+        )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
+        ) from e
+    except UserIsBanned as e:
+        logger.info(
+            "Login operation rejected: User (username=%s) is banned", user.username
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="The user is banned"
+        ) from e
 
 
 # эндпоинт выхода из аккаунта
 @router.post("/logout")
 async def logout(response: Response):
     response.delete_cookie(key=JWT_COOKIE_NAME)
-    response.status_code = 204
+    response.status_code = status.HTTP_204_NO_CONTENT
+    logger.info("Logout operation success")
     return response
 
 
 # метод авторизации эндпоинта http, используется при помощи Depends
 async def authorize_http_endpoint(request: Request, uow: UOW) -> UserDTO:
     if not JWT_COOKIE_NAME in request.cookies:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+        logger.info("HTTP authorization rejected: cookies is empty")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized"
+        )
     try:
-
-        return await AuthService.authorize(request.cookies[JWT_COOKIE_NAME], uow)
+        user = await AuthService.authorize(request.cookies[JWT_COOKIE_NAME], uow)
+        logger.debug(
+            "HTTP authorization success: User (username=%s) is verified", user.username
+        )
+        return user
 
     except (InvalidToken, TokenExpire) as e:
+        logger.warning("HTTP authorization rejected: Token is invalid or expired")
         raise HTTPException(
-            status_code=401, detail="Token is invalid or expired"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token is invalid or expired",
         ) from e
 
     except UserNotExist as e:
-        raise HTTPException(status_code=401, detail="Token user not exist") from e
+        logger.warning("HTTP authorization rejected: Token user not exist")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Token user not exist"
+        ) from e
+
+    except UserIsBanned as e:
+        logger.info("HTTP authorization rejected: The user is banned")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="The user is banned"
+        ) from e
 
 
 # метод авторизации эндпоинта ws, используется при помощи Depends
 async def authorize_ws_endpoint(websocket: WebSocket, uow: UOW) -> UserDTO | None:
     if not JWT_COOKIE_NAME in websocket.cookies:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    try:
-
-        return await AuthService.authorize(websocket.cookies[JWT_COOKIE_NAME], uow)
-
-    except (InvalidToken, TokenExpire, UserNotExist):
+        logger.info("WS authorization rejected: cookies is empty")
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return None
+    try:
+        user = await AuthService.authorize(websocket.cookies[JWT_COOKIE_NAME], uow)
+        return user
+
+    except (InvalidToken, TokenExpire, UserNotExist, UserIsBanned):
+        logger.info("WS authorization rejected: invalid cridentials")
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        return None
+
+
+async def authorize_http_admin(
+    user: Annotated[UserDTO, Depends(authorize_http_endpoint)]
+):
+    if user.role != "admin":
+        logger.info(
+            "Authorization rejected: User (username=%s) is not administrator",
+            user.username,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="You are not an administrator"
+        )
+    return user
+
+
+CurrentUser = Annotated[UserDTO, Depends(authorize_http_endpoint)]
+CurrentAdmin = Annotated[UserDTO, Depends(authorize_http_admin)]
