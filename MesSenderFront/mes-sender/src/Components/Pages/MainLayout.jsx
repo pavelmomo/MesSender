@@ -1,6 +1,5 @@
-import { Outlet, useNavigate } from "react-router-dom";
-import Menu from "../Blocks/Menu";
-import DialogsTab from "../Tabs/DialogsTab";
+import { Outlet } from "react-router-dom";
+import Menu from "../Menu";
 import { useEffect, useContext } from "react";
 import { AuthContext } from "../AuthProvider";
 
@@ -11,13 +10,13 @@ const mainContainerStyle = {
 };
 
 export default function MainLayout() {
-  const navigate = useNavigate();
   const { user, getCurrentUser } = useContext(AuthContext);
   useEffect(() => {
     getCurrentUser();
   }, []);
 
   if (user == null) return;
+
   return (
     <main>
       <div style={mainContainerStyle}>

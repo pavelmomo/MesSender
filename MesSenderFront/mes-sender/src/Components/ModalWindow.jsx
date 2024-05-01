@@ -1,8 +1,6 @@
-import { useContext } from "react";
 import { PushButton } from "./Buttons";
-import styles from "../Styles/ModalWindow.module.css";
+import styles from "./Styles/ModalWindow.module.css";
 import classnames from "classnames";
-import { AuthContext } from "../AuthProvider";
 
 export default function ModalWindow({ modalState, setModalState, style }) {
   function close() {

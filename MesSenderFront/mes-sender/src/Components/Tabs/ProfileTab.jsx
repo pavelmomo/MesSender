@@ -1,13 +1,16 @@
 import React, { useState, useContext, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "../Styles/ProfileTab.module.css";
-import { TextFieldBase } from "../Blocks/TextField";
-import { PushButton } from "../Blocks/Buttons";
+import { TextFieldBase } from "../TextField";
+import { PushButton } from "../Buttons";
 import { AuthContext } from "../AuthProvider";
 
 export default function ProfileTab() {
   const { user, getCurrentUser, showModal } = useContext(AuthContext);
   const [isRowsDisabled, setRowsDisabled] = useState(true);
   const [isSaveDisabled, setSaveDisabled] = useState(true);
+  const navigate = useNavigate();
+
   const changeVisability = useCallback(
     (e) => {
       e.preventDefault();
@@ -27,32 +30,44 @@ export default function ProfileTab() {
       if (e.target.new_password.value.trim().length !== 0) {
         data.new_password = e.target.new_password.value;
       }
-      const response = await fetch(`/api/users/me`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-      switch (response.status) {
-        case 201:
-          await getCurrentUser();
-          e.target.password.value = "";
-          setRowsDisabled(true);
-          break;
-        case 400:
-          e.target.password.value = "";
-          showModal("Введен неверный пароль");
-          break;
-        case 422:
-          showModal(
-            "Введены некорректные данные. Пароль и ник должен быть не менее 4 и не более 20 символов"
-          );
-          break;
-        case 409:
-          showModal("Данный ник или почта уже зарегистрированы");
-          break;
-        default:
+      try {
+        const response = await fetch(`/api/users/me`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+        switch (response.status) {
+          case 201:
+            await getCurrentUser();
+            e.target.password.value = "";
+            setRowsDisabled(true);
+            break;
+          case 400:
+            e.target.password.value = "";
+            showModal("Введен неверный пароль");
+            break;
+          case 422:
+            showModal(
+              "Введены некорректные данные. Пароль и ник должен быть не менее 4 и не более 20 символов"
+            );
+            break;
+          case 409:
+            showModal("Данный ник или почта уже зарегистрированы");
+            break;
+          case 401:
+          case 403:
+            navigate("/login");
+            break;
+          default:
+            throw Error(
+              "Ошибка при обращении к серверу.Статус ответа: " + response.status
+            );
+        }
+      } catch (err) {
+        console.log(err);
+        showModal("Произошла ошибка при обращении к серверу");
       }
     },
     [setRowsDisabled, getCurrentUser, showModal]
@@ -76,7 +91,6 @@ export default function ProfileTab() {
         alignItems: "flex-start",
         justifyContent: "center",
         flex: 10,
-        width: "100%",
       }}
     >
       <form className={styles.mainProfileContainer} onSubmit={handleSubmit}>

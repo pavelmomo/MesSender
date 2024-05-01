@@ -15,8 +15,6 @@ from .exceptions import (
     TokenExpire,
     UserIsBanned,
 )
-from . import UserService
-
 
 class AuthService:
     """
@@ -45,16 +43,17 @@ class AuthService:
     # метод аутенфикации пользователя
     @staticmethod
     async def login(user: UserLoginDTO, uow: AbstractUOW) -> str:
-        db_user = await UserService.get_user_by_username(user.username, uow)
-        if db_user is None:
-            raise UserNotExist
-        if db_user.is_banned:
-            raise UserIsBanned
-        pass_verify = AuthService.crypto_context.verify(user.password, db_user.password)
-        if not pass_verify:
-            raise InvalidCredentials
-        token = AuthService._create_jwt_token(db_user.id)
-        return token
+        async with uow:
+            db_user = await uow.users.get_by_username(user.username)
+            if db_user is None:
+                raise UserNotExist
+            if db_user.is_banned:
+                raise UserIsBanned
+            pass_verify = AuthService.crypto_context.verify(user.password, db_user.password)
+            if not pass_verify:
+                raise InvalidCredentials
+            token = AuthService._create_jwt_token(db_user.id)
+            return token
 
     # метод авторизации пользователя
     @staticmethod

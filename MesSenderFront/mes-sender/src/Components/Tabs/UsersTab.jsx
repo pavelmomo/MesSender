@@ -1,61 +1,87 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "../Styles/UsersTab.module.css";
-import { TextFieldBase } from "../Blocks/TextField";
-import { PushButton } from "../Blocks/Buttons";
+import { TextFieldBase } from "../TextField";
+import { PushButton } from "../Buttons";
 import { UserCard } from "../Cards/UserCard";
+import { AuthContext } from "../AuthProvider";
+
 export default function UsersTab() {
   const [users, setUsers] = useState([]);
+  const { showModal } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const createDialog = useCallback(async (remote_uid, remote_username) => {
-    const dialogStatus = await fetch(
-      "/api/dialogs/dual/check?" +
-        new URLSearchParams({
-          remote_uid: remote_uid,
-        }),
-      {
-        method: "POST",
-      }
-    ).then(
-      (response) => response.json(),
-      (error) => console.log(error)
-    );
-    if (dialogStatus === null) {
-      return;
-    }
-    if (dialogStatus.is_exist) {
-      navigate(
-        `/dialogs?` +
+    try {
+      const response = await fetch(
+        "/api/dialogs/dual/check?" +
           new URLSearchParams({
-            exist_dialog_id: dialogStatus.dialog_id,
-            dialog_name: remote_username,
-          })
-      );
-    } else {
-      navigate(
-        `/dialogs?` +
-          new URLSearchParams({
-            dialog_name: remote_username,
             remote_uid: remote_uid,
-          })
+          }),
+        { method: "POST" }
       );
+      switch (response.status) {
+        case 200:
+          const dialogStatus = await response.json();
+          if (dialogStatus.is_exist) {
+            navigate(
+              `/dialogs?` +
+                new URLSearchParams({
+                  exist_dialog_id: dialogStatus.dialog_id,
+                  dialog_name: remote_username,
+                })
+            );
+          } else {
+            navigate(
+              `/dialogs?` +
+                new URLSearchParams({
+                  dialog_name: remote_username,
+                  remote_uid: remote_uid,
+                })
+            );
+          }
+          break;
+        case 401:
+        case 403:
+          navigate("/login");
+          break;
+        default:
+          throw Error(
+            "Ошибка при обращении к серверу.Статус ответа: " + response.status
+          );
+      }
+    } catch (err) {
+      console.log(err);
+      showModal("Произошла ошибка при обращении к серверу");
     }
   }, []);
 
-  const handleSubmit = useCallback((e) => {
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
-    fetch(
-      "/api/users/search?" +
-        new URLSearchParams({
-          username: e.target.username.value,
-        })
-    )
-      .then(
-        (response) => response.json(),
-        (error) => console.log(error)
-      )
-      .then((data) => setUsers(data));
+    try {
+      const response = await fetch(
+        "/api/users/search?" +
+          new URLSearchParams({
+            username: e.target.username.value,
+          })
+      );
+      switch (response.status) {
+        case 200:
+          setUsers(await response.json());
+          break;
+        case 401:
+        case 403:
+          navigate("/login");
+          break;
+        default:
+          throw Error(
+            "Ошибка при обращении к серверу.Статус ответа: " + response.status
+          );
+      }
+    } catch (err) {
+      console.log(err);
+      showModal("Произошла ошибка при обращении к серверу");
+    }
   }, []);
 
   return (

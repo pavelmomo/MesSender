@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
-import { DialogCard } from "../Cards/DialogCard";
-import { DialogsContext } from "../Tabs/DialogsTab";
+import { DialogCard } from "./Cards/DialogCard";
+import { DialogsContext } from "./Tabs/DialogsTab";
 
 const emptyList = (
   <h6

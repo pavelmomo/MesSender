@@ -1,12 +1,13 @@
 import React, { useContext } from "react";
 
 import HailTwoToneIcon from "@mui/icons-material/HailTwoTone";
+import { AdminPanelSettings } from "@mui/icons-material";
 import AccountCircleTwoToneIcon from "@mui/icons-material/AccountCircleTwoTone";
 import SmsTwoToneIcon from "@mui/icons-material/SmsTwoTone";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
-import styles from "../Styles/Menu.module.css";
+import styles from "./Styles/Menu.module.css";
 import { ButtonWithIcon } from "./Buttons";
-import { AuthContext } from "../AuthProvider";
+import { AuthContext } from "./AuthProvider";
 
 const userMenuList = [
   [<SmsTwoToneIcon />, "Диалоги", "", 1],
@@ -14,8 +15,8 @@ const userMenuList = [
   [<AccountCircleTwoToneIcon />, "Профиль", "profile", 3],
 ];
 const adminMenuList = [
+  [<AdminPanelSettings />, "Администрирование", "admin", 4],
   ...userMenuList,
-  [<HailTwoToneIcon />, "Администрирование", "hhh", 4],
 ];
 const menuVariants = { user: userMenuList, admin: adminMenuList };
 

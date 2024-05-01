@@ -1,10 +1,11 @@
 from logging import getLogger
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from schemas import UserReadShortDTO, UserDTO, UserUpdateDTO
+from services.exceptions import IncorrectData, OperationNotPermitted
 from services import UserService, AuthService, UserAlreadyExist, InvalidCredentials
 from api.auth_router import CurrentUser, CurrentAdmin
 from api.dependencies import UOW, Paginator
-from services.exceptions import IncorrectData, OperationNotPermitted
+
 
 logger = getLogger(__name__)
 router = APIRouter(prefix="/api/users", tags=["Users"])  # создание роутера
@@ -54,7 +55,7 @@ async def update_current_user(update: UserUpdateDTO, user: CurrentUser, uow: UOW
         ) from e
 
 
-@router.patch("/{id_to_block}")
+@router.patch("/{id_to_ban}")
 async def ban_user(id_to_ban: int, is_banned: bool, user: CurrentAdmin, uow: UOW):
     try:
 

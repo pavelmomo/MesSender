@@ -8,6 +8,7 @@ import { AuthProvider } from "./Components/AuthProvider";
 import Login from "./Components/Pages/Login";
 import Register from "./Components/Pages/Register";
 import ProfileTab from "./Components/Tabs/ProfileTab";
+import AdminTab from "./Components/Tabs/AdminTab";
 
 const url = "localhost:8000";
 
@@ -21,6 +22,7 @@ export default function App() {
             <Route path="dialogs" element={<DialogsTab />} />
             <Route path="users" element={<UsersTab />} />
             <Route path="profile" element={<ProfileTab />} />
+            <Route path="admin" element={<AdminTab />} />
           </Route>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

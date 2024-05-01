@@ -24,7 +24,7 @@ export const DialogCard = memo(({ dialog }) => {
       <div className={styles.messageContainer}>
         <p style={{ margin: 3 }}>{dialog.dialog_name}</p>
         <h6 className={styles.lastMessage}>
-          {stringLimit(dialog.last_message, 30)}
+          {stringLimit(dialog.last_message, 25)}
         </h6>
       </div>
     </button>

@@ -33,13 +33,13 @@ class UserRepositoryPgs(AbstractUserRepository):
 
     async def get_active_by_partly_username(self, username: str) -> list[User]:
         query = select(User).where(
-            and_(User.username.contains(username), User.is_banned is False)
+            and_(User.username.contains(username), User.is_banned == False)
         )
         result = await self.session.scalars(query)
         return result.all()
 
     async def get_all(self, limit: int, offset: int) -> list[User]:
-        query = select(User).offset(offset).limit(limit)
+        query = select(User).order_by(User.username).offset(offset).limit(limit)
         result = await self.session.scalars(query)
         return result.all()
 

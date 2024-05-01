@@ -1,6 +1,6 @@
-import DialogsList from "../Blocks/DialogsList";
-import { useSearchParams } from "react-router-dom";
-import Dialog from "../Blocks/Dialog";
+import DialogsList from "../DialogsList";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import Dialog from "../Dialog";
 import styles from "../Styles/DialogsTab.module.css";
 import { AuthContext } from "../AuthProvider";
 import { wsUri } from "../../Utils";
@@ -16,19 +16,38 @@ import React, {
 export const DialogsContext = createContext(null);
 
 export default function DialogsTab() {
-  const { user } = useContext(AuthContext);
+  const { user, showModal } = useContext(AuthContext);
   const [messages, setMessages] = useState([]);
   const [dialogs, setDialogs] = useState([]);
+  const navigate = useNavigate();
   const [currentDialog, setCurrentDialog] = useState(null);
   const [dialogWS, setDialogWS] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const loadDialogs = useCallback(async () => {
-    var dialogsBuf = await fetch(`/api/dialogs/`).then(
-      (response) => response.json(),
-      () => console.log("Response error!")
-    );
+    var dialogsBuf = [];
+    try {
+      const response = await fetch(`/api/dialogs/`);
+      switch (response.status) {
+        case 200:
+          dialogsBuf = await response.json();
+          break;
+        case 401:
+        case 403:
+          navigate("/login");
+          break;
+        default:
+          throw Error(
+            "Ошибка при обращении к серверу.Статус ответа: " + response.status
+          );
+      }
+    } catch (err) {
+      console.log(err);
+      showModal("Произошла ошибка при обращении к серверу");
+      return;
+    }
     const dialogName = searchParams.get("dialog_name");
+
     if (dialogName !== null) {
       // была переадресация со страницы поиска пользователей
       const dialogId = searchParams.get("exist_dialog_id");
@@ -51,7 +70,7 @@ export default function DialogsTab() {
     }
 
     setDialogs(dialogsBuf);
-  }, [searchParams, setSearchParams, setCurrentDialog]);
+  }, [searchParams, setSearchParams, setCurrentDialog, showModal]);
 
   const handleNewMessage = useCallback(
     (e) => {

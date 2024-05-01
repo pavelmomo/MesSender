@@ -4,6 +4,7 @@
   justify-content: space-evenly;
   height: 100vh;
   min-height: 500px;
+  width: 100%;
 }
 
 .dialogListContainer {
@@ -19,7 +20,7 @@ dialogListContainer::-webkit-scrollbar {
 }
 .mainDialogContainer {
   height: 80%;
-  min-width: 500px;
+  min-width: 470px;
   width: 50%;
   margin-top: 15px;
   border: 3px solid;

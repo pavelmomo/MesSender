@@ -1,0 +1,23 @@
+.mainContainer {
+  height: 60px;
+  width: 100%;
+  display: flex;
+  border-radius: 3px;
+  border: 2px solid;
+  border-color: var(--main-color);
+  box-shadow: 1px 1px 3px 0px var(--shadow-color);
+  margin-bottom: 5px;
+}
+
+.statusContainer {
+  align-self: center;
+  text-align: center;
+  margin: 15px;
+  width: 110px;
+}
+.dataContainer {
+  flex: 1;
+  margin-left: 10px;
+  display: flex;
+  align-items: center;
+}

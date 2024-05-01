@@ -1,11 +1,12 @@
 import React, { useCallback, useContext, useRef, useEffect } from "react";
-import { MessageCard } from "../Cards/MessageCard";
-import styles from "../Styles/Dialog.module.css";
+import { MessageCard } from "./Cards/MessageCard";
+import styles from "./Styles/Dialog.module.css";
 import { ArrowBackIosNewSharp, Person2Rounded } from "@mui/icons-material";
 import { IconButton, PushButton } from "./Buttons";
 import { TextFieldBase } from "./TextField";
-import { DialogsContext } from "../Tabs/DialogsTab";
-import { AuthContext } from "../AuthProvider";
+import { DialogsContext } from "./Tabs/DialogsTab";
+import { AuthContext } from "./AuthProvider";
+import { useNavigate } from "react-router-dom";
 
 const EmptyDialog = (
   <div className={styles.emptyContainerStyle}>
@@ -15,16 +16,34 @@ const EmptyDialog = (
 
 export default function Dialog() {
   const messageListContainer = useRef(null);
+  const navigate = useNavigate();
   const { currentDialog, setCurrentDialog, messages, setMessages, dialogWS } =
     useContext(DialogsContext);
-  const { user } = useContext(AuthContext);
+  const { user, showModal } = useContext(AuthContext);
 
   useEffect(() => {
     async function loadMessages() {
-      const response = await fetch(`/api/dialogs/${currentDialog.id}/messages`);
-      if (response.status !== 200) return;
-      const mes = await response.json();
-      setMessages(mes);
+      try {
+        const response = await fetch(
+          `/api/dialogs/${currentDialog.id}/messages`
+        );
+        switch (response.status) {
+          case 200:
+            setMessages(await response.json());
+            break;
+          case 401:
+          case 403:
+            navigate("/login");
+            break;
+          default:
+            throw Error(
+              "Ошибка при обращении к серверу.Статус ответа: " + response.status
+            );
+        }
+      } catch (err) {
+        console.log(err);
+        showModal("Произошла ошибка при обращении к серверу");
+      }
     }
     if (
       currentDialog !== null &&
@@ -38,7 +57,7 @@ export default function Dialog() {
         behavior: "instant",
       });
     }
-  }, [currentDialog, setMessages]);
+  }, [currentDialog, setMessages, showModal]);
 
   useEffect(() => {
     if (currentDialog !== null) {

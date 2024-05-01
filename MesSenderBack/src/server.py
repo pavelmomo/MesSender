@@ -4,7 +4,7 @@ from api.routers import all_routers
 from utils.middleware import ErrorHandlerMiddleware
 
 app = FastAPI(
-    title="Web Application", debug=False
+    title="Message Sender Application", debug=False
 )  # создание экземпляра приложения Fastapi
 
 app.add_middleware(ErrorHandlerMiddleware)
