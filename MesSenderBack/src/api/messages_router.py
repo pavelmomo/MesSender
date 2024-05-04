@@ -87,14 +87,12 @@ async def websocket_endpoint(
         logger.warning(
             "WS messages endpoint: Access for User (id=%s) denied, disconnect... ", user.id
         )
-        NotifyService.unregister(websocket, user_id)
-        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        await NotifyService.unregister(websocket, user_id, status.WS_1008_POLICY_VIOLATION)
 
     except WebSocketDisconnect:
-        logger.info("WS messages endpoint: User (username=%s) disconnect", user.username)
-        NotifyService.unregister(websocket, user_id)
+        logger.info("WS messages endpoint: User (username=%s) disconnected", user.username)
+        await NotifyService.unregister(websocket, user_id)
 
     except Exception as e:
-        NotifyService.unregister(websocket, user_id)
-        await websocket.close(code=status.WS_1011_INTERNAL_ERROR)
+        await NotifyService.unregister(websocket, user_id,status.WS_1011_INTERNAL_ERROR)
         raise e

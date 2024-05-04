@@ -2,11 +2,15 @@ version: '3.8'
 
 services:
 
-  pg_db:
-    image: postgres:alpine3.19
-    restart: always
-    environment:
-      - POSTGRES_PASSWORD=postgres
+  proxy:
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile
+    ports:
+      - 8888:80
+    depends_on:
+      - backend
+      
   backend:
     build:
       dockerfile: ./Dockerfile
@@ -20,9 +24,10 @@ services:
       - DB_PASS=postgres
       - DB_USER=postgres
 
-  proxy:
-    build:
-      context: .
-      dockerfile: ./nginx/Dockerfile
-    ports:
-      - 8888:80
+  pg_db:
+    image: postgres:alpine3.19
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=postgres
+
+  

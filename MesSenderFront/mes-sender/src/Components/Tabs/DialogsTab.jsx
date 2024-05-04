@@ -147,9 +147,27 @@ export default function DialogsTab() {
   );
   useEffect(() => {
     loadDialogs();
-    const ws = new WebSocket(`${wsUri}/api/messages/ws`);
-    setDialogWS(ws);
-    return () => ws.close();
+    try {
+      const ws = new WebSocket(`${wsUri}/api/messages/ws`);
+      ws.onclose = (e) => {
+        switch (e.code) {
+          case 1008:
+            navigate("/login");
+            break;
+          case 1012:
+            showModal(
+              "Произошло отключение от сервера. Попробуйте перезагузить страницу"
+            );
+            break;
+          default:
+        }
+      };
+
+      setDialogWS(ws);
+      return () => ws.close();
+    } catch (err) {
+      console.log(err);
+    }
   }, []);
 
   useEffect(() => {

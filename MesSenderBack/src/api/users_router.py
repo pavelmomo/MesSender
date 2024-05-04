@@ -54,12 +54,15 @@ async def update_current_user(update: UserUpdateDTO, user: CurrentUser, uow: UOW
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid password"
         ) from e
 
-
+# эндпоинт блокировки пользователя
 @router.patch("/{id_to_ban}")
 async def ban_user(id_to_ban: int, is_banned: bool, user: CurrentAdmin, uow: UOW):
     try:
 
         await UserService.ban_user(id_to_ban, is_banned, uow)
+        logger.info(
+            "User ban operation for User (id=%s) success", id_to_ban,
+        )
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     except IncorrectData as e:
         logger.info(

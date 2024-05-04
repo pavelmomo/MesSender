@@ -1,8 +1,7 @@
 from fastapi import WebSocket, WebSocketDisconnect
-from schemas import PackageDTO
+from fastapi.websockets import WebSocketState
+from schemas import PackageDTO, MessageDTO, EventType, SetMessageViewedDTO
 from repositories import AbstractUOW
-from schemas.message_schemas import MessageDTO
-from schemas.notify_schemas import EventType, SetMessageViewedDTO
 
 
 class NotifyService:
@@ -27,15 +26,29 @@ class NotifyService:
 
     # метод отключения от оповещений
     @staticmethod
-    def unregister(websocket: WebSocket, user_id: int):
+    async def unregister(websocket: WebSocket, user_id: int, status_code: int = 1000):
         if (
             user_id not in NotifyService.connections
             or websocket not in NotifyService.connections[user_id]
         ):
             return
+        if websocket.client_state == WebSocketState.CONNECTED:
+            await websocket.close(status_code)
         NotifyService.connections[user_id].remove(websocket)
         if len(NotifyService.connections[user_id]) == 0:
             del NotifyService.connections[user_id]
+
+    # метод отключения от оповещений всех устройств пользователя с опред. id
+    @staticmethod
+    async def unregister_by_id(user_id: int, status_code: int = 1008):
+        if user_id not in NotifyService.connections:
+            return
+        for item in NotifyService.connections[user_id]:
+            if item.client_state == WebSocketState.CONNECTED:
+                await item.close(status_code)
+
+        del NotifyService.connections[user_id]
+
 
     # метод отправки 'пакета' по Websocket
     @staticmethod
@@ -51,8 +64,7 @@ class NotifyService:
                 try:
                     await i.send_json(package.json())
                 except WebSocketDisconnect:
-                    NotifyService.unregister(i, id)
-
+                    await NotifyService.unregister(i, id)
 
     # метод обработки пакетов пользователя по Websocket
     @staticmethod

@@ -1,12 +1,12 @@
 from repositories import AbstractUOW
 from db.exceptions import IncorrectData as IncorrectDataRepo
-from schemas.user_schemas import UserDTO
+from schemas.user_schemas import UserDTO, UserReadShortDTO
 from services.exceptions import (
     IncorrectData as IncorrectDataService,
     OperationNotPermitted,
 )
-from schemas import UserReadShortDTO
-from models import User
+from services import NotifyService
+
 
 
 class UserService:
@@ -38,6 +38,8 @@ class UserService:
                     raise OperationNotPermitted
                 update_dict = {"id": user_id, "is_banned": is_banned}
                 await uow.users.update_user(update_dict)
+                if is_banned:
+                    await NotifyService.unregister_by_id(user_id)
 
         except IncorrectDataRepo as e:
             raise OperationNotPermitted from e
