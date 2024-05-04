@@ -9,7 +9,7 @@ from fastapi import (
     APIRouter,
     status,
 )
-from config import JWT_COOKIE_NAME
+from config import JWT_COOKIE_NAME, JWT_EXPIRATION_TIME
 from api.dependencies import UOW
 from schemas import UserCreateDTO, UserLoginDTO, UserDTO
 from services import AuthService
@@ -54,7 +54,9 @@ async def login(user: UserLoginDTO, uow: UOW, response: Response):
     try:
         token = await AuthService.login(user, uow)
         logger.info("User (username=%s) has successfully logged in", user.username)
-        response.set_cookie(key=JWT_COOKIE_NAME, value=token)
+        response.set_cookie(
+            key=JWT_COOKIE_NAME, value=token, max_age=JWT_EXPIRATION_TIME
+        )
         response.status_code = status.HTTP_204_NO_CONTENT
         return response
 
