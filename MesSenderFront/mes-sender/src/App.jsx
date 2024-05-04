@@ -10,8 +10,6 @@ import Register from "./Components/Pages/Register";
 import ProfileTab from "./Components/Tabs/ProfileTab";
 import AdminTab from "./Components/Tabs/AdminTab";
 
-const url = "localhost:8000";
-
 export default function App() {
   return (
     <BrowserRouter>
@@ -33,5 +31,3 @@ export default function App() {
     </BrowserRouter>
   );
 }
-
-export { url };

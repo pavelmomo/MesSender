@@ -13,7 +13,7 @@ export default function MainLayout() {
   const { user, getCurrentUser } = useContext(AuthContext);
   useEffect(() => {
     getCurrentUser();
-  }, []);
+  }, [getCurrentUser]);
 
   if (user == null) return;
 

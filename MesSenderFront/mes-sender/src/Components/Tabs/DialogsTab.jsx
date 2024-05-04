@@ -70,7 +70,7 @@ export default function DialogsTab() {
     }
 
     setDialogs(dialogsBuf);
-  }, [searchParams, setSearchParams, setCurrentDialog, showModal]);
+  }, [searchParams, setSearchParams, setCurrentDialog, showModal, navigate]);
 
   const handleNewMessage = useCallback(
     (e) => {
