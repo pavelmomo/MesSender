@@ -18,19 +18,15 @@ class DialogRepositoryPgs(AbstractDialogRepository):
         subquery = (
             select(Message.id)
             .filter(
-                and_(
-                    Message.dialog_id == Dialog.id,
-                    Message.created_at > DialogUser.border_date,
-                )
+                Message.dialog_id == Dialog.id
             )
             .order_by(Message.created_at.desc())
             .limit(1)
             .scalar_subquery()
-            .correlate(Dialog, DialogUser)
+            .correlate(Dialog)
         )
         query = (
             select(DialogUser)
-            .filter(DialogUser.user_id == user_id)
             .join(Dialog, DialogUser.dialog_id == Dialog.id)
             .join(
                 Message, Message.id == subquery
@@ -40,6 +36,7 @@ class DialogRepositoryPgs(AbstractDialogRepository):
             .options(contains_eager(DialogUser.remote_user))
             .options(contains_eager(DialogUser.dialog, Dialog.messages))
             .order_by(Message.created_at.desc())
+            .filter(DialogUser.user_id == user_id, Message.created_at > DialogUser.border_date)
             .limit(limit)
             .offset(offset)
         )
