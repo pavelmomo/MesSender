@@ -4,12 +4,11 @@ from fastapi import (
     Depends,
     HTTPException,
     Response,
-    Request,
     WebSocket,
     APIRouter,
     status,
 )
-from config import JWT_COOKIE_NAME, JWT_EXPIRATION_TIME
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from api.dependencies import UOW
 from schemas import UserCreateDTO, UserLoginDTO, UserDTO
 from services import AuthService
@@ -24,6 +23,13 @@ from services.exceptions import (
 
 logger = getLogger(__name__)
 router = APIRouter(prefix="/api/auth", tags=["Auth"])  # создание роутера
+
+HTTPAuthorizationHeader = Annotated[
+    HTTPAuthorizationCredentials | None,
+    Depends(
+        HTTPBearer(description="Авторизация при помощи JWT Bearer", auto_error=False)
+    ),
+]
 
 
 # эндпоинт регистрации
@@ -54,9 +60,7 @@ async def login(user: UserLoginDTO, uow: UOW, response: Response):
     try:
         token = await AuthService.login(user, uow)
         logger.info("User (username=%s) has successfully logged in", user.username)
-        response.set_cookie(
-            key=JWT_COOKIE_NAME, value=token, max_age=JWT_EXPIRATION_TIME
-        )
+        response.headers["Authorization-token"] = token
         response.status_code = status.HTTP_204_NO_CONTENT
         return response
 
@@ -76,24 +80,17 @@ async def login(user: UserLoginDTO, uow: UOW, response: Response):
         ) from e
 
 
-# эндпоинт выхода из аккаунта
-@router.post("/logout")
-async def logout(response: Response):
-    response.delete_cookie(key=JWT_COOKIE_NAME)
-    response.status_code = status.HTTP_204_NO_CONTENT
-    logger.info("Logout operation success")
-    return response
-
-
 # метод авторизации эндпоинта http, используется при помощи Depends
-async def authorize_http_endpoint(request: Request, uow: UOW) -> UserDTO:
-    if not JWT_COOKIE_NAME in request.cookies:
-        logger.info("HTTP authorization rejected: cookies is empty")
+async def authorize_http_endpoint(
+    auth_header: HTTPAuthorizationHeader, uow: UOW
+) -> UserDTO:
+    if auth_header is None:
+        logger.info("HTTP authorization rejected: No valid authorization header")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized"
         )
     try:
-        user = await AuthService.authorize(request.cookies[JWT_COOKIE_NAME], uow)
+        user = await AuthService.authorize(auth_header.credentials, uow)
         logger.debug(
             "HTTP authorization success: User (username=%s) is verified", user.username
         )
@@ -121,12 +118,18 @@ async def authorize_http_endpoint(request: Request, uow: UOW) -> UserDTO:
 
 # метод авторизации эндпоинта ws, используется при помощи Depends
 async def authorize_ws_endpoint(websocket: WebSocket, uow: UOW) -> UserDTO | None:
-    if not JWT_COOKIE_NAME in websocket.cookies:
-        logger.info("WS authorization rejected: cookies is empty")
+    if not "Authorization" in websocket.headers:
+        logger.info("WS authorization rejected: No authorization header")
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return None
+    auth_header = websocket.headers["Authorization"].split()
+    if len(auth_header) < 2 or not "Bearer" in auth_header:
+        logger.warning("WS authorization rejected: Authorization header is invalid")
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        return None
+    token = auth_header[1]
     try:
-        user = await AuthService.authorize(websocket.cookies[JWT_COOKIE_NAME], uow)
+        user = await AuthService.authorize(token, uow)
         return user
 
     except (InvalidToken, TokenExpire, UserNotExist, UserIsBanned):
