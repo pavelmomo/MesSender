@@ -117,23 +117,13 @@ async def authorize_http_endpoint(
 
 
 # метод авторизации эндпоинта ws, используется при помощи Depends
-async def authorize_ws_endpoint(websocket: WebSocket, uow: UOW) -> UserDTO | None:
-    if not "Authorization" in websocket.headers:
-        logger.info("WS authorization rejected: No authorization header")
-        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
-        return None
-    auth_header = websocket.headers["Authorization"].split()
-    if len(auth_header) < 2 or not "Bearer" in auth_header:
-        logger.warning("WS authorization rejected: Authorization header is invalid")
-        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
-        return None
-    token = auth_header[1]
+async def authorize_ws_endpoint(websocket: WebSocket, uow: UOW, bearer_token: str) -> UserDTO | None:
     try:
-        user = await AuthService.authorize(token, uow)
+        user = await AuthService.authorize(bearer_token, uow)
         return user
 
     except (InvalidToken, TokenExpire, UserNotExist, UserIsBanned):
-        logger.info("WS authorization rejected: invalid cridentials")
+        logger.info("WS authorization rejected: invalid credentials")
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return None
 
