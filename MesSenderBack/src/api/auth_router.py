@@ -2,12 +2,14 @@ from logging import getLogger
 from typing import Annotated
 from fastapi import (
     Depends,
+    Request,
     HTTPException,
     Response,
     WebSocket,
     APIRouter,
     status,
 )
+from config import JWT_EXPIRATION_TIME
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from api.dependencies import UOW
 from schemas import UserCreateDTO, UserLoginDTO, UserDTO
@@ -60,7 +62,10 @@ async def login(user: UserLoginDTO, uow: UOW, response: Response):
     try:
         token = await AuthService.login(user, uow)
         logger.info("User (username=%s) has successfully logged in", user.username)
-        response.headers["Authorization-token"] = token
+        response.headers["Authorization-Token"] = token
+        response.set_cookie(
+            key="Authorization-Token", value=token, max_age=JWT_EXPIRATION_TIME
+        )
         response.status_code = status.HTTP_204_NO_CONTENT
         return response
 
@@ -80,17 +85,31 @@ async def login(user: UserLoginDTO, uow: UOW, response: Response):
         ) from e
 
 
+# эндпоинт выхода из аккаунта
+@router.post("/logout")
+async def logout(response: Response):
+    response.delete_cookie(key="Authorization-Token")
+    response.status_code = status.HTTP_204_NO_CONTENT
+    logger.info("Logout operation success")
+    return response
+
+
 # метод авторизации эндпоинта http, используется при помощи Depends
 async def authorize_http_endpoint(
-    auth_header: HTTPAuthorizationHeader, uow: UOW
+    request: Request, auth_header: HTTPAuthorizationHeader, uow: UOW
 ) -> UserDTO:
-    if auth_header is None:
-        logger.info("HTTP authorization rejected: No valid authorization header")
+    if auth_header is not None:
+        token = auth_header.credentials
+    elif "Authorization-Token" in request.cookies:
+        token = request.cookies["Authorization-Token"]
+    else:
+        logger.info("HTTP authorization rejected: No valid authorization token")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized"
         )
+
     try:
-        user = await AuthService.authorize(auth_header.credentials, uow)
+        user = await AuthService.authorize(token, uow)
         logger.debug(
             "HTTP authorization success: User (username=%s) is verified", user.username
         )
@@ -117,9 +136,23 @@ async def authorize_http_endpoint(
 
 
 # метод авторизации эндпоинта ws, используется при помощи Depends
-async def authorize_ws_endpoint(websocket: WebSocket, uow: UOW, bearer_token: str) -> UserDTO | None:
+async def authorize_ws_endpoint(websocket: WebSocket, uow: UOW) -> UserDTO | None:
+    if "Authorization" in websocket.headers:
+        token = websocket.headers["Authorization"].split()
+        if len(token) < 2 or not "Bearer" in token:
+            logger.info("WS authorization rejected: Invalid authorization header")
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            return None
+        token = token[1]
+    elif "Authorization-Token" in websocket.cookies:
+        token = websocket.cookies["Authorization-Token"]
+    else:
+        logger.info("WS authorization rejected: No authorization token")
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        return None
+
     try:
-        user = await AuthService.authorize(bearer_token, uow)
+        user = await AuthService.authorize(token, uow)
         return user
 
     except (InvalidToken, TokenExpire, UserNotExist, UserIsBanned):
