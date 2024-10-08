@@ -13,16 +13,22 @@ export default function Login() {
     async (e) => {
       e.preventDefault();
       try {
-        const response = await fetch(`/api/auth/login`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username: e.target.username.value,
-            password: e.target.password.value,
-          }),
-        });
+        const response = await fetch(
+          `/api/auth/login?` +
+            new URLSearchParams({
+              token_transport: "cookie",
+            }),
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              username: e.target.username.value,
+              password: e.target.password.value,
+            }),
+          }
+        );
         switch (response.status) {
           case 204:
             navigate("/");

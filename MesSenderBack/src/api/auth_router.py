@@ -9,10 +9,10 @@ from fastapi import (
     APIRouter,
     status,
 )
-from config import JWT_EXPIRATION_TIME
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from config import JWT_EXPIRATION_TIME
 from api.dependencies import UOW
-from schemas import UserCreateDTO, UserLoginDTO, UserDTO
+from schemas import UserCreateDTO, UserLoginDTO, UserDTO, TokenTransportTypes
 from services import AuthService
 from services.exceptions import (
     UserAlreadyExist,
@@ -58,14 +58,22 @@ async def register(new_user: UserCreateDTO, uow: UOW):
 
 # эндпоинт входа в аккаунт
 @router.post("/login")
-async def login(user: UserLoginDTO, uow: UOW, response: Response):
+async def login(
+    user: UserLoginDTO,
+    uow: UOW,
+    response: Response,
+    token_transport: TokenTransportTypes,
+):
     try:
         token = await AuthService.login(user, uow)
         logger.info("User (username=%s) has successfully logged in", user.username)
-        response.headers["Authorization-Token"] = token
-        response.set_cookie(
-            key="Authorization-Token", value=token, max_age=JWT_EXPIRATION_TIME
-        )
+        match token_transport:
+            case TokenTransportTypes.header:
+                response.headers["Authorization-Token"] = token
+            case TokenTransportTypes.cookie:
+                response.set_cookie(
+                    key="Authorization-Token", value=token, max_age=JWT_EXPIRATION_TIME
+                )
         response.status_code = status.HTTP_204_NO_CONTENT
         return response
 
