@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { observer } from "mobx-react-lite";
-import { AuthRoutes, AppRoutes } from "./navigation";
+import { AuthRoutes, AppRoutes } from "./navigation/navigation";
 import RootStore from "./store/RootStore";
 
 const AppContainer = observer(() => {

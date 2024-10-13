@@ -1,7 +1,7 @@
 import { Text } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-
+import LoginScreen from "../screens/LoginScreen";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -14,8 +14,12 @@ const DialogsMock = () => {
 
 export const AuthRoutes = () => {
   return (
-    <Stack.Navigator>
-      <Stack.Screen name="Login" component={LoginMock} />
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={LoginMock} />
     </Stack.Navigator>
   );

@@ -13,6 +13,7 @@
     "@react-navigation/bottom-tabs": "^6.6.1",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/native-stack": "^6.11.0",
+    "classnames-react-native": "^1.1.0",
     "expo": "~51.0.28",
     "expo-status-bar": "~1.12.1",
     "mobx-react-lite": "^4.0.7",

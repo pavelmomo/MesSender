@@ -11,9 +11,12 @@ export class AuthStore {
     makeAutoObservable(this);
   }
 
-  unauthorize() {
-    this.isAuthorized = false;
-    this.currentUser = null;
+  async unauthorize() {
+    await AsyncStorage.removeItem(TOKEN_STORAGE_KEY);
+    runInAction(() => {
+      this.isAuthorized = false;
+      this.currentUser = null;
+    });
   }
 
   setCurrentUser(user: UserDTO) {
@@ -23,9 +26,12 @@ export class AuthStore {
 
   async getCurrentUser() {
     const savedToken = await AsyncStorage.getItem(TOKEN_STORAGE_KEY);
-    // if (!savedToken) {
-    //   return;
-    // }
+    if (!savedToken) {
+      return;
+    }
     const user = await getCurrentUser(savedToken);
+    if (user != null) {
+      this.setCurrentUser(user);
+    }
   }
 }
