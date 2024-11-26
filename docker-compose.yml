@@ -6,6 +6,7 @@ services:
     build:
       context: .
       dockerfile: ./nginx/Dockerfile
+    restart: always
     ports:
       - 8888:80
     depends_on:
@@ -15,7 +16,7 @@ services:
     build:
       dockerfile: ./Dockerfile
       context: ./MesSenderBack
-    restart: on-failure:3
+    restart: always
     depends_on:
       - pg_db
     environment:
@@ -29,5 +30,6 @@ services:
     restart: always
     environment:
       - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
 
-  

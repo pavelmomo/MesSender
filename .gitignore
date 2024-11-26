@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Docker volumes
+postgres-data/
 # C extensions
 *.so
 
