@@ -1,5 +1,5 @@
 from itertools import islice
-from models.user import User
+from models.user import Role, User
 from repositories.abstract_repository import AbstractUserRepository
 
 
@@ -48,8 +48,12 @@ class MockUserRepository(AbstractUserRepository):
         return sampled_users
 
     async def create_user(self, user: User) -> User:
-        last_id = self.users[-1].id
-        user.id = last_id + 1
+        new_id = 0
+        if len(self.users) > 0:
+            new_id = self.users[-1].id + 1
+        user.id = new_id
+        user.is_banned = False
+        user.role = Role.user
         self.users.append(user)
         return user
 
