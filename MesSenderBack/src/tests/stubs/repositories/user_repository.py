@@ -1,9 +1,10 @@
 from itertools import islice
+
 from models.user import Role, User
 from repositories.abstract_repository import AbstractUserRepository
 
 
-class MockUserRepository(AbstractUserRepository):
+class StubUserRepository(AbstractUserRepository):
     def __init__(self):
         self.users: list[User] = []
 
@@ -58,11 +59,10 @@ class MockUserRepository(AbstractUserRepository):
         return user
 
     async def update_user(self, update_dict: dict) -> None:
-        user_id = update_dict['id']
+        user_id = update_dict["id"]
         index = None
         for ind, user in enumerate(self.users):
             if user.id == user_id:
                 index = ind
         for key, val in update_dict.items():
             setattr(self.users[index], key, val)
-            

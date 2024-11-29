@@ -2,7 +2,7 @@ import pytest
 
 from models.user import User
 from repositories.abstract_repository import AbstractUOW
-from tests.mocks.repositories.unitofwork import uow
+from tests.stubs.repositories.unitofwork import uow
 from services.user_service import UserService
 
 class TestUserService:

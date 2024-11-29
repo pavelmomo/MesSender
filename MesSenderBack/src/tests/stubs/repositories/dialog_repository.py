@@ -1,13 +1,13 @@
-from itertools import islice
 from typing import Sequence
+
 from models.dialog import Dialog, DialogUser
 from repositories.abstract_repository import AbstractDialogRepository
 
 
-class MockDialogRepository(AbstractDialogRepository):
+class StubDialogRepository(AbstractDialogRepository):
     def __init__(self):
         self.dialogs: list[Dialog] = []
-        self.dialog_users: list[DialogUser]  = []
+        self.dialog_users: list[DialogUser] = []
 
     async def get_active_user_dialogs(
         self, user_id: int, limit: int, offset: int

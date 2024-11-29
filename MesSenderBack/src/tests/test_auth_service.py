@@ -1,9 +1,9 @@
 import pytest
 
-from models.user import User
+from models.user import Role, User
 from repositories.abstract_repository import AbstractUOW
 from schemas.user_schemas import UserCreateDTO, UserLoginDTO
-from tests.mocks.repositories.unitofwork import uow
+from tests.stubs.repositories.unitofwork import uow
 from services.auth_service import AuthService
 
 class TestAuthService:
@@ -14,7 +14,8 @@ class TestAuthService:
                               username='test',
                               email='test@mail.ru',
                               password='$2b$12$LiK.Aij0y6/lR4dcMk2QuOXbd4khAvw8NZR3bOpFYg3f.782MIS5.',
-                              is_banned = False))
+                              is_banned = False,
+                              role=Role.user))
 
     async def test_register(self, uow: AbstractUOW):
         new_user = UserCreateDTO(username='new_user',

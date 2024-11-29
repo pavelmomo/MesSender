@@ -7,7 +7,7 @@ from models.message import Message, MessageStatus
 from models.user import User
 from repositories.abstract_repository import AbstractUOW
 from schemas.message_schemas import MessageCreateDTO
-from tests.mocks.repositories.unitofwork import uow
+from tests.stubs.repositories.unitofwork import uow
 from services.message_service import MessageService
 
 class TestMessageService:
