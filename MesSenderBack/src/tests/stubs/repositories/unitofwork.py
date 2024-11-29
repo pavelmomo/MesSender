@@ -8,7 +8,7 @@ from tests.stubs.repositories.message_repository import StubMessageRepository
 from tests.stubs.repositories.user_repository import StubUserRepository
 
 
-class MockUnitOfWork(AbstractUOW):
+class StubUnitOfWork(AbstractUOW):
     def __init__(self):
         self.users = StubUserRepository()
         self.messages = StubMessageRepository()
@@ -34,4 +34,4 @@ class MockUnitOfWork(AbstractUOW):
 
 @pytest.fixture(scope='class')
 def uow():
-    return MockUnitOfWork()
+    return StubUnitOfWork()
