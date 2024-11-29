@@ -5,10 +5,7 @@ from repositories.abstract_repository import AbstractUserRepository
 
 class MockUserRepository(AbstractUserRepository):
     def __init__(self):
-        self.users = [User(id=1, username='test',
-                           email='test@mail.ru',
-                           password='P@ssw0rd',
-                           is_banned = False)]
+        self.users: list[User] = []
 
     async def get_by_id(self, user_id: int) -> User | None:
         search_user = None
